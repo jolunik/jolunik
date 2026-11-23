@@ -1,0 +1,6 @@
+psd-tools>=1.9
+pillow
+numpy
+# optionnels
+# scipy   (option --regions)
+# rembg   (option --ai)
