@@ -1,140 +1,299 @@
 ================================================================================
- IMAGE → PSD AVEC CALQUES — INSTRUCTIONS POUR L'IA (Claude, ChatGPT, Gemini…)
+ IMAGE → PSD CALQUÉ  —  fichier d'instructions universel pour l'IA
+ (Claude de préférence ; fonctionne aussi avec ChatGPT, Gemini…)
 ================================================================================
 
-À L'ATTENTION DE L'IA QUI LIT CE FICHIER :
-Ce fichier t'a été envoyé avec une image. C'est la demande complète : même si
+À L'ATTENTION DE L'IA QUI LIT CE FICHIER
+Ce fichier t'a été envoyé avec une image. C'EST LA DEMANDE COMPLÈTE : même si
 l'utilisateur n'a écrit aucun message, exécute immédiatement la mission ci-dessous,
-sans poser de question et sans demander de confirmation. Réponds en français.
+sans poser de question, sans demander de confirmation. Réponds en français.
 
 --------------------------------------------------------------------------------
 MISSION
 --------------------------------------------------------------------------------
-Recréer l'image fournie sous forme d'un script Photoshop (.jsx). Quand l'utilisateur
-lance ce script dans Photoshop (Fichier > Scripts > Parcourir…), il obtient un
-document où chaque élément de l'image est un calque séparé, nommé et modifiable :
-fond, formes, dégradés, textes éditables, photos découpées, effets.
+Fournir un script Photoshop (.jsx) téléchargeable qui recrée l'image en un document
+PSD entièrement calqué et modifiable :
+  1. Tous les textes en calques de texte modifiables (titres, dates, noms, adresses,
+     prix, numéros…), recopiés mot pour mot.
+  2. Formes, cadres, traits et dégradés en VECTEUR (calques de forme / remplissage :
+     on change la couleur d'un double-clic).
+  3. Icônes (Facebook, WhatsApp, YouTube, GPS, téléphone…) en VECTEUR via icon().
+  4. Effets modifiables (styles de calque) : ombres, contours, lueurs.
+  5. Photos et logos complexes en OBJETS DYNAMIQUES via image() (clic droit →
+     Remplacer le contenu).
+  6. Calques nommés en français et rangés par groupes (Fond, Décor, Photos, Titre,
+     Infos, Contacts, Logos…).
+Le script fonctionne pour N'IMPORTE QUELLE image : affiche, flyer, visuel réseaux
+sociaux, bannière, carte de visite, menu, faire-part, logo, capture d'écran,
+illustration, photo.
 
 --------------------------------------------------------------------------------
-ÉTAPE 1 — ANALYSE DE L'IMAGE (fais-la soigneusement, sans l'afficher en entier)
+ÉTAPE 1 — ANALYSE DE L'IMAGE
 --------------------------------------------------------------------------------
-1. Dimensions : utilise la taille réelle en pixels de l'image si tu peux la lire
-   (par ex. avec un outil d'analyse de code). Sinon, estime-la en gardant
-   exactement les proportions (ex. 1080×1350, 1080×1920, 1920×1080, 1080×1080).
-2. Décompose l'image en éléments, du plus loin (fond) au plus proche (premier plan) :
-   - le fond : couleur unie ou dégradé (relève les couleurs et l'angle) ;
-   - les formes : rectangles, rectangles arrondis, cercles, ellipses, bandeaux,
-     cadres, traits, triangles et autres polygones ;
-   - les zones « photo » : personnes, objets, produits, paysages, textures,
-     logos complexes, illustrations — tout ce qui ne se dessine pas avec des formes ;
-   - TOUS les textes : recopie-les mot pour mot (accents, majuscules, ponctuation),
-     un calque par bloc de texte de même style ;
-   - les effets visibles : ombres portées, contours, transparence, modes de fusion.
-3. Pour chaque élément, mesure sa position et sa taille en pixels (x, y = coin
-   haut-gauche), sa couleur exacte en hexadécimal (#RRGGBB), son opacité.
-4. Pour chaque texte : taille en pixels (hauteur des majuscules ≈ 0,7 × taille),
-   alignement, interlignage, espacement des lettres, et la police la plus proche
-   avec son NOM POSTSCRIPT (voir la liste plus bas).
-5. Regroupe les calques dans des groupes logiques : « Fond », « Décor », « Photo »,
-   « Textes », « Logo », « Bouton »… (noms en français, clairs).
+1. Dimensions EXACTES en pixels (lis-les avec ton outil de code si tu en as un).
+2. Identifie le type d'image et adapte la stratégie :
+   • Affiche / flyer / visuel / bannière / carte / menu : décomposition complète
+     (fond, décor, formes, photos, textes, icônes, logos).
+   • Logo : reconstruis-le en vecteur (svgShape, polygon, ellipse, rect, text) ;
+     ajoute aussi image('Logo original', …, {hidden:true}) pour comparaison.
+   • Photo seule : image('Photo', [0,0,L,H]) ; si un sujet se détache nettement,
+     ajoute au-dessus image('Sujet', [silhouette en 20 à 60 points]) ; puis les
+     éventuels textes / logos posés sur la photo.
+   • Capture d'écran / interface : rectangles arrondis, textes, icônes, photos.
+   • Illustration : grandes zones de couleur en vecteur (svgShape / polygon),
+     parties trop détaillées en image().
+3. Liste TOUS les éléments, du plus éloigné (fond) au premier plan. Pour chacun :
+   position et taille en pixels (x, y = coin haut-gauche), couleur(s) en #RRGGBB,
+   opacité, coins arrondis, effets visibles (ombre, contour, lueur).
+4. Textes : recopie exacte (accents, majuscules, ponctuation, retours à la ligne),
+   un calque par bloc de même style ; taille en px (≈ hauteur des majuscules ÷ 0,7),
+   alignement, interlignage, espacement des lettres, police la plus proche (nom
+   PostScript, liste plus bas), maxWidth = largeur occupée dans l'image.
+   Texte courbe ou très déformé : texte droit + note dans le nom du calque.
+5. Icônes : utilise icon() avec la clé de la liste ICÔNES. Une icône absente de
+   la liste → dessine-la avec svgShape() (tracé SVG 24×24 que tu connais) ou,
+   à défaut, image().
+6. Tout ce qui ne se dessine pas proprement en formes (personnes, objets, produits,
+   paysages, textures, logos de marques complexes, QR codes) → image().
+7. Vise la fidélité : 15 à 80 calques selon la richesse de l'image. N'oublie aucun
+   texte, aucune icône.
 
 --------------------------------------------------------------------------------
-ÉTAPE 2 — ÉCRITURE DU SCRIPT
+ÉTAPE 2 — ÉCRITURE DE LA FONCTION DE CONSTRUCTION
 --------------------------------------------------------------------------------
-Le script final = la BIBLIOTHÈQUE ci-dessous recopiée À L'IDENTIQUE (ne change
-rien, ne raccourcis rien, ne la résume pas), suivie d'une fonction build() que tu
-écris pour cette image, puis de la ligne de lancement.
+Écris un bloc de la forme :
 
-Règles de la fonction build() :
-- Commencer par createDoc('Nom_calques', LARGEUR, HAUTEUR, '#couleurDeFond')
-  puis loadReference().
-- Appeler les fonctions dans l'ordre du FOND vers le PREMIER PLAN : chaque nouveau
-  calque se place au-dessus des précédents (dans son groupe s'il en a un).
-- Créer un groupe avec  var g = group('Nom');  puis passer { group: g } aux calques.
-  Sous-groupe : group('Nom', groupeParent).
-- Toujours finir par finish();
-- JavaScript ancien (ExtendScript / ES3) : utiliser uniquement var, function,
-  for. INTERDIT : let, const, =>, `gabarits`, forEach, map, classes, JSON.
-- Textes : dans les chaînes, échapper les apostrophes (\') ; retour à la ligne : \n
-- Coordonnées en pixels, nombres entiers.
-- Sois précis et complet : vise 10 à 60 calques selon la richesse de l'image.
-  Un élément non reproductible avec des formes → image(). N'oublie aucun texte.
+run(function () {
+    createDoc('Nom_calques', LARGEUR, HAUTEUR, '#couleurDeFond');
+    loadReference();
+    var fond = group('Fond');
+    ... (appels dans l'ordre : du fond vers le premier plan) ...
+    finish();
+});
 
-FONCTIONS DISPONIBLES (o = options facultatives, voir plus bas) :
-  createDoc(nom, largeur, hauteur, '#fond')
-  loadReference()                          ← demande l'image originale à l'utilisateur
-  group(nom [, groupeParent])              → renvoie le groupe
-  rect(nom, x, y, l, h, '#hex', o)         ← rectangle ; o.radius = coins arrondis
-  ellipse(nom, x, y, l, h, '#hex', o)      ← cercle / ellipse (x,y = coin haut-gauche)
+Règles :
+- Chaque nouveau calque se place AU-DESSUS des précédents (dans son groupe).
+  Crée les groupes dans l'ordre d'empilement voulu (le premier créé est en bas).
+- JavaScript ancien (ExtendScript / ES3) UNIQUEMENT : var, function, for, if.
+  INTERDIT : let, const, =>, `…${}`, forEach, map, filter, class, JSON.
+- Dans les chaînes entre apostrophes, échappe les apostrophes : 'L\'Espace'.
+  Retour à la ligne dans un texte : \n
+- Coordonnées en pixels (entiers), dans le repère de l'image d'origine.
+
+FONCTIONS DISPONIBLES   (fill = '#hex'  ou  { gradient: [['#hex', 0], ['#hex', 100]], angle: 90, radial: false })
+  createDoc(nom, largeur, hauteur, fill)
+  loadReference()                       ← charge l'image d'origine (intégrée au script)
+  group(nom [, groupeParent])           → renvoie le groupe
+  rect(nom, x, y, l, h, fill, o)        ← rectangle ; o.radius = coins arrondis
+  ellipse(nom, x, y, l, h, fill, o)     ← cercle / ellipse
   gradient(nom, x, y, l, h, [['#hex', 0], ['#hex', 100]], angle, o)
-                                           ← dégradé ; angle 90 = de bas en haut,
-                                             0 = de gauche à droite ; o.radial = true
-  polygon(nom, [[x,y], [x,y], ...], '#hex', o)   ← triangle, forme libre
-  line(nom, x1, y1, x2, y2, épaisseur, '#hex', o)
+        ← angle 90 = 1re couleur en bas → 2e en haut ; 0 = gauche → droite ;
+          o.radial = true. Arrêt transparent : ['#hex', position, opacité 0-100]
+  frame(nom, x, y, l, h, épaisseur, fill, o)    ← cadre vectoriel (o.radius)
+  line(nom, x1, y1, x2, y2, épaisseur, fill, o) ← trait vectoriel
+  polygon(nom, [[x,y], [x,y], ...], fill, o)    ← triangle, bandeau en biais…
+  svgShape(nom, 'tracé SVG d', largeurVB, hauteurVB, x, y, l, h, fill, o)
+        ← forme libre vectorielle (vagues, taches, flèches, logos simples)
+  icon(nom, 'clé', x, y, taille, fill, o)       ← icône vectorielle (liste plus bas)
   text(nom, 'contenu', x, y, taille, 'PolicePostScript', '#hex', o)
-        ← x,y = haut-gauche du texte ; si o.align = 'center' : x = centre du texte ;
-          si 'right' : x = bord droit. Options : align, tracking (ex. 50, 200),
-          leading (interligne en px), caps (true = tout en majuscules), bold,
-          italic, underline.
-  image(nom, [x, y, l, h], o)  ou  image(nom, [[x,y], [x,y], ...], o)
-        ← zone photo découpée dans l'image originale (rectangle ou contour
-          détouré suivant la silhouette, 8 à 40 points). o.feather = flou du bord.
+        ← x,y = haut-gauche du texte ; o.align 'center' : x = centre ;
+          'right' : x = bord droit
+  image(nom, [x, y, l, h], o)   ou   image(nom, [[x,y], [x,y], ...], o)
+        ← OBJET DYNAMIQUE repris de l'image d'origine ; liste de points =
+          silhouette détourée (20 à 60 points) ; o.shape = 'ellipse' pour une
+          photo ronde ; o.radius pour coins arrondis
   finish()
 
-OPTIONS COMMUNES (o) :
-  group: g            opacity: 0-100        hidden: true
-  blend: 'MULTIPLY' | 'SCREEN' | 'OVERLAY' | 'SOFTLIGHT' | 'COLORDODGE' | 'LIGHTEN' | 'DARKEN'
-  shadow: { color: '#000000', opacity: 50, angle: 120, distance: 8, size: 15, spread: 0 }
-  stroke: { color: '#FFFFFF', size: 3, position: 'out' | 'in' | 'center', opacity: 100 }
+OPTIONS (o) — toutes facultatives
+  group: g        opacity: 0-100      fillOpacity: 0-100      hidden: true
+  blend: 'MULTIPLY' | 'SCREEN' | 'OVERLAY' | 'SOFTLIGHT' | 'LIGHTEN' | 'DARKEN' | 'COLORDODGE'
+  shadow:      { color: '#000000', opacity: 50, angle: 120, distance: 8, size: 15, spread: 0 }
+  innerShadow: { mêmes réglages }
+  stroke:      { color: '#FFFFFF', size: 3, position: 'out' | 'in' | 'center', opacity: 100 }
+  glow:        { color: '#FFD700', size: 20, opacity: 75, spread: 0 }     ← lueur externe
+  innerGlow:   { mêmes réglages }                                         ← lueur interne
+  Texte uniquement : align, tracking (ex. 50, 200), leading (interligne px),
+    caps: true, bold: true, italic: true, underline: true, maxWidth: px,
+    rotate: degrés, fallback: 'PolicePostScriptDeSecours'
 
-POLICES — noms PostScript à utiliser (choisis la plus ressemblante) :
-  Sans-serif : ArialMT, Arial-BoldMT, Arial-Black, Helvetica, Helvetica-Bold,
-    Montserrat-Regular, Montserrat-Medium, Montserrat-SemiBold, Montserrat-Bold,
-    Montserrat-ExtraBold, Montserrat-Black, Poppins-Regular, Poppins-Medium,
-    Poppins-SemiBold, Poppins-Bold, Poppins-ExtraBold, Poppins-Black,
+POLICES — noms PostScript conseillés (prends la plus ressemblante)
+  Sans-serif : Montserrat-Regular, Montserrat-Medium, Montserrat-SemiBold,
+    Montserrat-Bold, Montserrat-ExtraBold, Montserrat-Black, Poppins-Regular,
+    Poppins-Medium, Poppins-SemiBold, Poppins-Bold, Poppins-ExtraBold, Poppins-Black,
     Roboto-Regular, Roboto-Bold, Roboto-Black, OpenSans-Regular, OpenSans-Bold,
-    Inter-Regular, Inter-Bold, Lato-Regular, Lato-Bold, Lato-Black,
-    BebasNeue-Regular, Oswald-Regular, Oswald-Bold, Anton-Regular, Impact,
-    Futura-Medium, Futura-Bold, AvenirNext-Regular, AvenirNext-Bold
-  Serif : TimesNewRomanPSMT, Georgia, Georgia-Bold, PlayfairDisplay-Regular,
-    PlayfairDisplay-Bold, PlayfairDisplay-Black, Merriweather-Bold, Didot, Bodoni
-  Manuscrites / déco : DancingScript-Bold, GreatVibes-Regular, Pacifico-Regular,
-    Lobster-Regular, BrushScriptMT, Satisfy-Regular, PermanentMarker-Regular
-  (Si la police n'est pas installée, le script bascule automatiquement sur Arial ;
-  l'utilisateur pourra la changer, le texte reste modifiable.)
+    Inter-Regular, Inter-Bold, Lato-Regular, Lato-Bold, Raleway-Bold,
+    BebasNeue-Regular, Oswald-Regular, Oswald-Bold, Anton-Regular, LeagueSpartan-Bold,
+    ArialMT, Arial-BoldMT, Arial-Black, Impact, Futura-Bold
+  Serif : PlayfairDisplay-Regular, PlayfairDisplay-Bold, PlayfairDisplay-Black,
+    Merriweather-Bold, LibreBaskerville-Regular, Cinzel-Bold, TimesNewRomanPSMT,
+    Georgia, Georgia-Bold
+  Manuscrites / déco : GreatVibes-Regular, DancingScript-Bold, Pacifico-Regular,
+    Lobster-Regular, Satisfy-Regular, Allura-Regular, Parisienne-Regular,
+    PermanentMarker-Regular, Righteous-Regular, Bangers-Regular
+  Police absente du PC → remplacée automatiquement par Arial (le script l'indique à la
+  fin ; le texte reste modifiable).
+
+ICÔNES — clés utilisables avec icon()
+  Réseaux / marques : facebook, instagram, whatsapp, youtube, tiktok, x, linkedin,
+    telegram, snapchat, pinterest, messenger, threads, spotify, applemusic, deezer,
+    soundcloud, twitch, discord, googlemaps, gmail, google, paypal, apple,
+    googleplay, appstore, visa, mastercard, airbnb, uber, netflix, zoom, vimeo, reddit
+  Contact / infos : phone, telephone, mobile, email, email_outline, location,
+    location_outline, web, globe, calendar, calendar_outline, calendar_check, clock,
+    clock_filled, map, navigation, info, qrcode, chat, comment, send, share, search, bell
+  Divers : ticket, user, users, account_tie, home, home_city, building, cart,
+    shopping_bag, tag, sale, percent, cash, credit_card, gift, star, star_outline,
+    heart, heart_outline, check, check_circle, close, arrow_right, arrow_left,
+    arrow_down, arrow_up, chevron_right, play, play_circle, wifi, car, bus, truck,
+    airplane, package, music, microphone, microphone_variant, guitar, headphones,
+    dance, party, cake, food, restaurant, coffee, drink, beer, school, book, church,
+    mosque, hospital, medical, tooth, baby, camera, image, video, lightbulb, fire,
+    lock, key, shield, download, briefcase, tools, hammer, scissors, hanger,
+    dumbbell, soccer, basketball, trophy, crown, diamond, leaf, sun, moon, flower,
+    paw, handshake, thumb_up, quote, parking, wheelchair, sparkles, spa, bed,
+    laptop, cellphone_message
 
 --------------------------------------------------------------------------------
-ÉTAPE 3 — FORMAT DE TA RÉPONSE
+ÉTAPE 3 — FABRICATION DU FICHIER .jsx
 --------------------------------------------------------------------------------
-1. Une phrase : ce que tu as reconnu dans l'image et le nombre de calques créés.
-2. Le script COMPLET :
-   - si tu peux créer des fichiers, fournis un fichier téléchargeable nommé
-     <nom-de-l-image>_calques.jsx ;
-   - sinon, donne-le dans UN SEUL bloc de code, du « #target photoshop » jusqu'à
-     la dernière ligne, sans rien couper ni « … ».
-3. Le mode d'emploi, en court :
-   ① Enregistre le code dans un fichier texte terminé par .jsx (s'il n'est pas déjà
-     téléchargé).
-   ② Photoshop > Fichier > Scripts > Parcourir… > choisis le fichier .jsx.
-   ③ Quand le script le demande, réponds « Oui » et sélectionne l'image originale :
-     les photos seront découpées dedans (sinon elles apparaissent en gris).
-   ④ Enregistre le résultat : Fichier > Enregistrer sous > Photoshop (.PSD).
-4. Une liste des polices utilisées (à installer si besoin, ex. Google Fonts).
-
-Vérifie avant d'envoyer : bibliothèque intacte, aucun let/const/=>, toutes les
-parenthèses et guillemets fermés, finish() présent, tous les textes recopiés.
+A) SI TU AS UN OUTIL D'EXÉCUTION DE CODE (cas normal avec Claude) : exécute le
+   programme Python ci-dessous (section ASSEMBLAGE) en remplaçant seulement les
+   3 chemins et le contenu de BUILD par ta fonction run(...). Il recopie la
+   bibliothèque sans erreur, intègre l'image d'origine dans le script (les photos
+   et logos seront découpés automatiquement, sans rien demander à l'utilisateur)
+   et protège les accents. Ne tape JAMAIS toi-même la bibliothèque ni le base64.
+   Fournis ensuite le fichier .jsx créé en téléchargement.
+B) SANS OUTIL DE CODE : écris un seul bloc de code contenant, dans l'ordre :
+   la ligne  #target photoshop , puis la BIBLIOTHÈQUE recopiée à l'identique
+   (dans la partie ICÔNES, tu peux ne garder que les lignes des icônes utilisées),
+   puis ta fonction run(...). Le script demandera alors l'image d'origine au
+   lancement.
 
 --------------------------------------------------------------------------------
-BIBLIOTHÈQUE — À RECOPIER TELLE QUELLE AU DÉBUT DU SCRIPT
+ÉTAPE 4 — TA RÉPONSE À L'UTILISATEUR (courte)
 --------------------------------------------------------------------------------
-#target photoshop
+1. Une phrase : type d'image reconnu + nombre de calques + groupes créés.
+2. Le fichier <nom-de-l-image>_calques.jsx à télécharger (ou le bloc de code).
+3. Mode d'emploi :
+   ① Télécharge le script.
+   ② Photoshop : Fichier → Scripts → Parcourir… → choisis le script.
+     (Le premier lancement peut prendre quelques secondes : l'image est intégrée.)
+   ③ Enregistre : Fichier → Enregistrer sous → Photoshop (.PSD).
+4. À savoir :
+   • Le résultat est très proche de l'original mais pas identique au pixel près :
+     certaines polices sont remplacées par des polices proches et les effets très
+     compliqués sont approchés.
+   • Photos et logos sont repris de l'image : leur qualité dépend de l'image de
+     départ. Remplace-les par les tiens : clic droit sur le calque → Remplacer le
+     contenu.
+   • Sers-toi des affiches trouvées comme modèles de mise en page : change les
+     textes, photos et couleurs avant de les utiliser pour un client.
+5. La liste des polices utilisées (à installer si besoin, la plupart sont gratuites
+   sur Google Fonts).
+
+Vérifie avant d'envoyer : aucun let/const/=>, apostrophes échappées, parenthèses et
+accolades fermées, finish() présent, tous les textes et icônes repris.
+
+--------------------------------------------------------------------------------
+ASSEMBLAGE — programme Python à exécuter (option A)
+--------------------------------------------------------------------------------
+import base64, io, struct
+from PIL import Image
+
+TXT = 'CHEMIN/VERS/IMAGE-VERS-PSD.txt'          # ce fichier d'instructions
+IMG = 'CHEMIN/VERS/image_envoyee.jpg'           # l'image envoyée par l'utilisateur
+OUT = 'DOSSIER/DE/SORTIE/nom_calques.jsx'       # le script à fournir
+
+BUILD = r'''
+run(function () {
+    createDoc('Nom_calques', 1080, 1350, '#FFFFFF');
+    loadReference();
+    // ... tes calques ...
+    finish();
+});
+'''
+
+src = open(TXT, encoding='utf-8').read()
+lib = src.rsplit('//@@LIB_START', 1)[1].split('//@@LIB_END')[0]
+im = Image.open(IMG)
+print('Taille image :', im.size)
+buf = io.BytesIO()
+if im.mode in ('RGBA', 'LA', 'P'):
+    im.convert('RGBA').save(buf, 'PNG', optimize=True)
+else:
+    im.convert('RGB').save(buf, 'JPEG', quality=95)
+b64 = base64.b64encode(buf.getvalue()).decode('ascii')
+lib = lib.replace("var IMAGE_B64 = '';", "var IMAGE_B64 = '" + b64 + "';", 1)
+code = '#target photoshop\n' + lib + '\n' + BUILD
+
+def ascii_js(s):  # accents -> \uXXXX (lus correctement par Photoshop)
+    out = []
+    for ch in s:
+        if ord(ch) < 128:
+            out.append(ch)
+        else:
+            u = ch.encode('utf-16-le')
+            out.extend('\\u%04x' % v for v in struct.unpack('<%dH' % (len(u) // 2), u))
+    return ''.join(out)
+
+open(OUT, 'w', encoding='ascii').write(ascii_js(code))
+print('Script créé :', OUT)
+
+--------------------------------------------------------------------------------
+EXEMPLE DE CONSTRUCTION (affiche 1080×1350 — à adapter à l'image reçue)
+--------------------------------------------------------------------------------
+run(function () {
+    createDoc('Affiche_calques', 1080, 1350, '#0E1B2C');
+    loadReference();
+
+    var fond = group('Fond');
+    gradient('Dégradé', 0, 0, 1080, 1350, [['#0E1B2C', 0], ['#1E3A5F', 100]], 90, { group: fond });
+    ellipse('Halo', 560, -160, 700, 700, { gradient: [['#F2B705', 0, 60], ['#F2B705', 100, 0]], radial: true }, { group: fond });
+
+    var photos = group('Photos');
+    image('Artiste', [[300, 300], [780, 300], [820, 1050], [260, 1050]], { group: photos, shadow: { opacity: 45, distance: 12, size: 30 } });
+    image('Logo partenaire', [60, 60, 160, 80], { group: photos });
+    image('Portrait rond', [820, 640, 200, 200], { group: photos, shape: 'ellipse', stroke: { color: '#FFFFFF', size: 6 } });
+
+    var titre = group('Titre');
+    text('Titre', 'GRANDE SOIRÉE', 540, 140, 120, 'Montserrat-ExtraBold', '#FFFFFF', { group: titre, align: 'center', tracking: 20, maxWidth: 980, glow: { color: '#F2B705', size: 25, opacity: 60 } });
+    text('Sous-titre', 'Live · DJ · Surprises', 540, 280, 44, 'Poppins-Medium', '#F2B705', { group: titre, align: 'center' });
+
+    var infos = group('Infos');
+    rect('Bandeau', 0, 1080, 1080, 270, '#F2B705', { group: infos });
+    frame('Cadre', 30, 30, 1020, 1290, 4, '#FFFFFF', { group: infos, radius: 24, opacity: 70 });
+    line('Filet', 240, 1180, 840, 1180, 3, '#0E1B2C', { group: infos });
+    text('Date', 'SAMEDI 12 DÉCEMBRE · 20H', 540, 1110, 52, 'Montserrat-Bold', '#0E1B2C', { group: infos, align: 'center' });
+    icon('Icône lieu', 'location', 250, 1205, 40, '#0E1B2C', { group: infos });
+    text('Adresse', 'Espace Culturel, Abidjan', 300, 1210, 34, 'Poppins-Regular', '#0E1B2C', { group: infos });
+
+    var contacts = group('Contacts');
+    icon('WhatsApp', 'whatsapp', 250, 1275, 40, '#0E1B2C', { group: contacts });
+    text('Téléphone', '+225 07 00 00 00 00', 300, 1280, 32, 'Poppins-SemiBold', '#0E1B2C', { group: contacts });
+    icon('Facebook', 'facebook', 720, 1275, 40, '#0E1B2C', { group: contacts });
+    polygon('Triangle', [[0, 1080], [200, 1080], [0, 900]], '#E63946', { group: contacts });
+    svgShape('Vague', 'M0 50 Q 25 0 50 50 T 100 50 V100 H0 Z', 100, 100, 0, 1000, 1080, 120, '#F2B705', { group: contacts, opacity: 50 });
+
+    finish();
+});
+
+--------------------------------------------------------------------------------
+BIBLIOTHÈQUE (entre les marqueurs — ne rien modifier)
+--------------------------------------------------------------------------------
+//@@LIB_START
+// =====================================================================================
+// BIBLIOTHÈQUE IMAGE → PSD v2 — à recopier telle quelle (ne rien modifier)
+// =====================================================================================
 app.bringToFront();
-// ===================== BIBLIOTHÈQUE IMAGE → PSD (ne pas modifier) =====================
-var DOC = null, REF = null, BLANK = null, COUNT = 0, OLD_RU = app.preferences.rulerUnits, OLD_TU = app.preferences.typeUnits;
+var IMAGE_B64 = '';
+var DOC = null, REF = null, BLANK = null, COUNT = 0, MISSING_FONTS = [], MISSING_ICONS = [];
+var OLD_RU = app.preferences.rulerUnits, OLD_TU = app.preferences.typeUnits;
+
 function cID(s) { return charIDToTypeID(s); }
 function sID(s) { return stringIDToTypeID(s); }
 function opt(o, k, d) { return (o && o[k] !== undefined && o[k] !== null) ? o[k] : d; }
 function px(v) { return new UnitValue(v, 'px'); }
+function deselect() { try { DOC.selection.deselect(); } catch (e) {} }
 function hex2rgb(h) {
     h = String(h).replace('#', '');
     if (h.length == 3) { h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2); }
@@ -146,9 +305,9 @@ function rgbDesc(h) {
     d.putDouble(cID('Rd  '), r[0]); d.putDouble(cID('Grn '), r[1]); d.putDouble(cID('Bl  '), r[2]);
     return d;
 }
-function deselect() { try { DOC.selection.deselect(); } catch (e) {} }
+function inArr(a, v) { for (var i = 0; i < a.length; i++) { if (a[i] == v) { return true; } } return false; }
 
-// Place le calque en haut de son groupe (ou du document) puis applique les options communes
+// ---------- Placement dans le groupe + options communes ----------
 function place(l, o) {
     var g = opt(o, 'group', null);
     try {
@@ -157,15 +316,16 @@ function place(l, o) {
             else { l.move(g, ElementPlacement.INSIDE); }
         } else { l.move(DOC.layers[0], ElementPlacement.PLACEBEFORE); }
     } catch (e) {}
-    if (opt(o, 'opacity', null) !== null) { l.opacity = o.opacity; }
-    if (opt(o, 'blend', null)) { try { l.blendMode = BlendMode[o.blend]; } catch (e) {} }
-    if (opt(o, 'shadow', null) || opt(o, 'stroke', null)) { effects(l, o); }
+    if (opt(o, 'opacity', null) !== null) { try { l.opacity = o.opacity; } catch (e1) {} }
+    if (opt(o, 'fillOpacity', null) !== null) { try { l.fillOpacity = o.fillOpacity; } catch (e2) {} }
+    if (opt(o, 'blend', null)) { try { l.blendMode = BlendMode[o.blend]; } catch (e3) {} }
+    if (o && (o.shadow || o.innerShadow || o.stroke || o.glow || o.innerGlow)) { effects(l, o); }
     if (opt(o, 'hidden', false)) { l.visible = false; }
     COUNT++;
     return l;
 }
 
-// Ombre portée et contour (styles de calque modifiables)
+// ---------- Styles de calque modifiables : ombres, contour, lueurs ----------
 function effects(l, o) {
     try {
         DOC.activeLayer = l;
@@ -173,19 +333,39 @@ function effects(l, o) {
         r.putProperty(cID('Prpr'), cID('Lefx')); r.putEnumerated(cID('Lyr '), cID('Ordn'), cID('Trgt'));
         d.putReference(cID('null'), r);
         fx.putUnitDouble(cID('Scl '), cID('#Prc'), 100);
-        if (o.shadow) {
-            var s = o.shadow, ds = new ActionDescriptor();
+        function shadow(s, key, inner) {
+            var ds = new ActionDescriptor();
             ds.putBoolean(cID('enab'), true);
             ds.putEnumerated(cID('Md  '), cID('BlnM'), cID('Mltp'));
             ds.putObject(cID('Clr '), cID('RGBC'), rgbDesc(opt(s, 'color', '#000000')));
-            ds.putUnitDouble(cID('Opct'), cID('#Prc'), opt(s, 'opacity', 50));
+            ds.putUnitDouble(cID('Opct'), cID('#Prc'), opt(s, 'opacity', inner ? 40 : 50));
             ds.putBoolean(cID('uglg'), false);
             ds.putUnitDouble(cID('lagl'), cID('#Ang'), opt(s, 'angle', 120));
-            ds.putUnitDouble(cID('Dstn'), cID('#Pxl'), opt(s, 'distance', 8));
+            ds.putUnitDouble(cID('Dstn'), cID('#Pxl'), opt(s, 'distance', inner ? 4 : 8));
             ds.putUnitDouble(cID('Ckmt'), cID('#Pxl'), opt(s, 'spread', 0));
-            ds.putUnitDouble(cID('blur'), cID('#Pxl'), opt(s, 'size', 15));
-            fx.putObject(cID('DrSh'), cID('DrSh'), ds);
+            ds.putUnitDouble(cID('blur'), cID('#Pxl'), opt(s, 'size', inner ? 8 : 15));
+            fx.putObject(cID(key), cID(key), ds);
         }
+        function glow(s, key, inner) {
+            var gd = new ActionDescriptor();
+            gd.putBoolean(cID('enab'), true);
+            gd.putEnumerated(cID('Md  '), cID('BlnM'), cID(opt(s, 'blend', 'screen') == 'normal' ? 'Nrml' : 'Scrn'));
+            gd.putObject(cID('Clr '), cID('RGBC'), rgbDesc(opt(s, 'color', '#FFFFFF')));
+            gd.putUnitDouble(cID('Opct'), cID('#Prc'), opt(s, 'opacity', 75));
+            gd.putEnumerated(cID('GlwT'), cID('BETE'), cID('SfBL'));
+            gd.putUnitDouble(cID('Ckmt'), cID('#Pxl'), opt(s, 'spread', 0));
+            gd.putUnitDouble(cID('blur'), cID('#Pxl'), opt(s, 'size', 20));
+            gd.putUnitDouble(cID('Nose'), cID('#Prc'), 0);
+            gd.putUnitDouble(cID('ShdN'), cID('#Prc'), 0);
+            gd.putBoolean(cID('AntA'), true);
+            gd.putUnitDouble(cID('Inpr'), cID('#Prc'), 50);
+            if (inner) { gd.putEnumerated(cID('glwS'), cID('IGSr'), cID('SrcE')); }
+            fx.putObject(cID(key), cID(key), gd);
+        }
+        if (o.shadow) { shadow(o.shadow, 'DrSh', false); }
+        if (o.innerShadow) { shadow(o.innerShadow, 'IrSh', true); }
+        if (o.glow) { glow(o.glow, 'OrGl', false); }
+        if (o.innerGlow) { glow(o.innerGlow, 'IrGl', true); }
         if (o.stroke) {
             var k = o.stroke, st = new ActionDescriptor(), pos = opt(k, 'position', 'out');
             st.putBoolean(cID('enab'), true);
@@ -202,23 +382,149 @@ function effects(l, o) {
     } catch (e) {}
 }
 
+// ---------- Remplissages : couleur unie '#hex' ou dégradé {gradient:[...], angle, radial} ----------
+function gradDesc(f) {
+    var stops = f.gradient, g = new ActionDescriptor(), gr = new ActionDescriptor(), cl = new ActionList(), tl = new ActionList(), i;
+    g.putUnitDouble(cID('Angl'), cID('#Ang'), opt(f, 'angle', 90));
+    g.putEnumerated(cID('Type'), cID('GrdT'), cID(opt(f, 'radial', false) ? 'Rdl ' : 'Lnr '));
+    if (opt(f, 'scale', null) !== null) { g.putUnitDouble(cID('Scl '), cID('#Prc'), f.scale); }
+    gr.putString(cID('Nm  '), 'Dégradé');
+    gr.putEnumerated(cID('GrdF'), cID('GrdF'), cID('CstS'));
+    gr.putDouble(cID('Intr'), 4096);
+    for (i = 0; i < stops.length; i++) {
+        var s = new ActionDescriptor(), t = new ActionDescriptor(), loc = Math.round(opt(stops[i], 1, i * 100 / Math.max(1, stops.length - 1)) * 40.96);
+        s.putObject(cID('Clr '), cID('RGBC'), rgbDesc(stops[i][0]));
+        s.putEnumerated(cID('Type'), cID('Clry'), cID('UsrS'));
+        s.putInteger(cID('Lctn'), loc); s.putInteger(cID('Mdpn'), 50);
+        cl.putObject(cID('Clrt'), s);
+        t.putUnitDouble(cID('Opct'), cID('#Prc'), opt(stops[i], 2, 100));
+        t.putInteger(cID('Lctn'), loc); t.putInteger(cID('Mdpn'), 50);
+        tl.putObject(cID('TrnS'), t);
+    }
+    gr.putList(cID('Clrs'), cl); gr.putList(cID('Trns'), tl);
+    g.putObject(cID('Grad'), cID('Grdn'), gr);
+    return g;
+}
+// Crée un calque de remplissage (couleur ou dégradé), avec une forme native si shp est donné
+function fillLayer(fill, shp) {
+    deselect();
+    var d = new ActionDescriptor(), r = new ActionReference(), ld = new ActionDescriptor();
+    r.putClass(sID('contentLayer')); d.putReference(cID('null'), r);
+    if (typeof fill == 'string') {
+        var f = new ActionDescriptor(); f.putObject(cID('Clr '), cID('RGBC'), rgbDesc(fill));
+        ld.putObject(cID('Type'), sID('solidColorLayer'), f);
+    } else { ld.putObject(cID('Type'), sID('gradientLayer'), gradDesc(fill)); }
+    if (shp) {
+        var sh = new ActionDescriptor();
+        sh.putUnitDouble(cID('Top '), cID('#Pxl'), shp.y); sh.putUnitDouble(cID('Left'), cID('#Pxl'), shp.x);
+        sh.putUnitDouble(cID('Btom'), cID('#Pxl'), shp.y + shp.h); sh.putUnitDouble(cID('Rght'), cID('#Pxl'), shp.x + shp.w);
+        ld.putObject(cID('Shp '), cID(shp.kind == 'ellipse' ? 'Elps' : 'Rctn'), sh);
+    }
+    d.putObject(cID('Usng'), sID('contentLayer'), ld);
+    executeAction(cID('Mk  '), d, DialogModes.NO);
+    return DOC.activeLayer;
+}
+
+// ---------- Tracés vectoriels ----------
+// polys : [[ [x,y], [x,y], ... ], ...] — plusieurs contours ; les contours intérieurs font des trous
+function makePath(polys) {
+    var spis = [], k, j;
+    for (k = 0; k < polys.length; k++) {
+        var pts = [];
+        for (j = 0; j < polys[k].length; j++) {
+            var pp = new PathPointInfo();
+            pp.kind = PointKind.CORNERPOINT;
+            pp.anchor = [polys[k][j][0], polys[k][j][1]];
+            pp.leftDirection = pp.anchor; pp.rightDirection = pp.anchor;
+            pts.push(pp);
+        }
+        var sp = new SubPathInfo();
+        sp.closed = true;
+        sp.operation = k == 0 ? ShapeOperation.SHAPEADD : ShapeOperation.SHAPEXOR;
+        sp.entireSubPath = pts;
+        spis.push(sp);
+    }
+    return DOC.pathItems.add('tmp_' + COUNT + '_' + new Date().getTime(), spis);
+}
+// Ajoute un masque vectoriel (polys) au calque l
+function vectorMask(l, polys) {
+    DOC.activeLayer = l;
+    var p = makePath(polys);
+    try {
+        p.select();
+        var d = new ActionDescriptor(), r = new ActionReference(), r2 = new ActionReference(), r3 = new ActionReference();
+        r.putClass(cID('Path')); d.putReference(cID('null'), r);
+        r2.putEnumerated(cID('Path'), cID('Path'), sID('vectorMask')); d.putReference(cID('At  '), r2);
+        r3.putEnumerated(cID('Path'), cID('Ordn'), cID('Trgt')); d.putReference(cID('Usng'), r3);
+        executeAction(cID('Mk  '), d, DialogModes.NO);
+    } catch (e) {}
+    try { p.remove(); } catch (e2) {}
+    DOC.activeLayer = l;
+    return l;
+}
+// Calque de forme vectorielle à partir de contours
+function pathShape(name, polys, fill, o) {
+    var l = fillLayer(fill, null);
+    vectorMask(l, polys);
+    l.name = name;
+    return place(l, o);
+}
+function roundRectD(x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    if (r == 0) { return 'M' + x + ' ' + y + 'H' + (x + w) + 'V' + (y + h) + 'H' + x + 'Z'; }
+    return 'M' + (x + r) + ' ' + y + 'H' + (x + w - r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + w) + ' ' + (y + r) +
+        'V' + (y + h - r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + w - r) + ' ' + (y + h) +
+        'H' + (x + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + x + ' ' + (y + h - r) +
+        'V' + (y + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + r) + ' ' + y + 'Z';
+}
+function ellipseD(x, y, w, h) {
+    var rx = w / 2, ry = h / 2;
+    return 'M' + x + ' ' + (y + ry) + 'A' + rx + ' ' + ry + ' 0 1 1 ' + (x + w) + ' ' + (y + ry) + 'A' + rx + ' ' + ry + ' 0 1 1 ' + x + ' ' + (y + ry) + 'Z';
+}
+function polysOf(d) { return svgPolys(d, 1, 1, 0, 0, 0.75); }
+
 // ---------- Document ----------
 function createDoc(name, w, h, bg) {
     app.preferences.rulerUnits = Units.PIXELS;
     app.preferences.typeUnits = TypeUnits.PIXELS;
     DOC = app.documents.add(px(w), px(h), 72, name, NewDocumentMode.RGB, DocumentFill.TRANSPARENT);
     BLANK = DOC.activeLayer;
-    if (bg) { rect('Fond', 0, 0, w, h, bg); }
+    if (bg) { var f = fillLayer(bg, null); f.name = 'Couleur de fond'; place(f, null); }
     return DOC;
 }
 
-// Demande l'image originale : sert de calque de référence et pour découper les zones photo
+// Décodage base64 (image intégrée au script)
+function b64decode(s) {
+    var k = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/', m = {}, i, out = [], ch = [], a, b, c, e;
+    for (i = 0; i < 64; i++) { m[k.charAt(i)] = i; }
+    s = s.replace(/[^A-Za-z0-9+\/]/g, '');
+    for (i = 0; i + 3 < s.length + 3; i += 4) {
+        a = m[s.charAt(i)]; b = m[s.charAt(i + 1)]; c = m[s.charAt(i + 2)]; e = m[s.charAt(i + 3)];
+        if (a === undefined || b === undefined) { break; }
+        ch.push(String.fromCharCode((a << 2) | (b >> 4)));
+        if (c !== undefined) { ch.push(String.fromCharCode(((b & 15) << 4) | (c >> 2))); }
+        if (e !== undefined) { ch.push(String.fromCharCode(((c & 3) << 6) | e)); }
+        if (ch.length > 30000) { out.push(ch.join('')); ch = []; }
+    }
+    out.push(ch.join(''));
+    return out.join('');
+}
+
+// Charge l'image d'origine (intégrée, sinon demandée) : calque de référence + source des photos
 function loadReference() {
-    if (!confirm("Sélectionner l'image originale ?\n(Oui = les photos/zones complexes seront découpées dans l'image d'origine)")) { return null; }
-    var f = File.openDialog("Choisir l'image originale (JPEG / PNG)");
-    if (!f) { return null; }
+    var f = null;
+    if (IMAGE_B64.length > 100) {
+        var ext = IMAGE_B64.substr(0, 4) == '/9j/' ? '.jpg' : '.png';
+        f = new File(Folder.temp + '/image_vers_psd_' + new Date().getTime() + ext);
+        f.encoding = 'BINARY'; f.open('w'); f.write(b64decode(IMAGE_B64)); f.close();
+    } else {
+        if (!confirm("Sélectionner l'image originale ?\nOui = les photos et logos seront repris de l'image.\nNon = ils seront remplacés par des cadres gris.")) { return null; }
+        f = File.openDialog("Choisir l'image originale (JPEG / PNG)");
+        if (!f) { return null; }
+    }
     try {
         var src = app.open(f);
+        try { src.changeMode(ChangeMode.RGB); } catch (e0) {}
         src.flatten();
         src.resizeImage(px(DOC.width.as('px')), px(DOC.height.as('px')), 72, ResampleMethod.BICUBIC);
         try { REF = src.activeLayer.duplicate(DOC, ElementPlacement.PLACEATBEGINNING); }
@@ -227,7 +533,7 @@ function loadReference() {
         app.activeDocument = DOC;
         try { REF.isBackgroundLayer = false; } catch (e2) {}
         REF.name = 'Image originale (référence)';
-        try { REF.move(DOC.layers[DOC.layers.length - 1], ElementPlacement.PLACEAFTER); } catch (e) {}
+        try { REF.move(DOC.layers[DOC.layers.length - 1], ElementPlacement.PLACEAFTER); } catch (e3) {}
     } catch (e) { alert("Impossible de charger l'image : " + e); REF = null; }
     return REF;
 }
@@ -241,95 +547,52 @@ function group(name, parent) {
     return g;
 }
 
-// ---------- Formes vectorielles (calques de forme modifiables) ----------
-function shape(kind, name, x, y, w, h, hex, o) {
-    deselect();
-    function make(withRadius) {
-        var d = new ActionDescriptor(), r = new ActionReference(), ld = new ActionDescriptor(), fill = new ActionDescriptor(), sh = new ActionDescriptor();
-        r.putClass(sID('contentLayer')); d.putReference(cID('null'), r);
-        fill.putObject(cID('Clr '), cID('RGBC'), rgbDesc(hex));
-        ld.putObject(cID('Type'), sID('solidColorLayer'), fill);
-        sh.putUnitDouble(cID('Top '), cID('#Pxl'), y);
-        sh.putUnitDouble(cID('Left'), cID('#Pxl'), x);
-        sh.putUnitDouble(cID('Btom'), cID('#Pxl'), y + h);
-        sh.putUnitDouble(cID('Rght'), cID('#Pxl'), x + w);
-        if (withRadius) { sh.putUnitDouble(cID('Rds '), cID('#Pxl'), o.radius); }
-        ld.putObject(cID('Shp '), cID(kind == 'ellipse' ? 'Elps' : 'Rctn'), sh);
-        d.putObject(cID('Usng'), sID('contentLayer'), ld);
-        executeAction(cID('Mk  '), d, DialogModes.NO);
-    }
-    var rad = kind == 'rect' && opt(o, 'radius', 0) > 0;
-    try { make(rad); } catch (e) { make(false); }
-    var l = DOC.activeLayer; l.name = name;
-    return place(l, o);
+// ---------- Formes vectorielles ----------
+// fill = '#hex' ou { gradient: [['#hex', 0], ['#hex', 100]], angle: 90, radial: false }
+function rect(name, x, y, w, h, fill, o) {
+    if (opt(o, 'radius', 0) > 0) { return pathShape(name, polysOf(roundRectD(x, y, w, h, o.radius)), fill, o); }
+    var l;
+    try { l = fillLayer(fill, { kind: 'rect', x: x, y: y, w: w, h: h }); l.name = name; return place(l, o); }
+    catch (e) { return pathShape(name, polysOf(roundRectD(x, y, w, h, 0)), fill, o); }
 }
-function rect(name, x, y, w, h, hex, o) { return shape('rect', name, x, y, w, h, hex, o); }
-function ellipse(name, x, y, w, h, hex, o) { return shape('ellipse', name, x, y, w, h, hex, o); }
-
-// ---------- Dégradé (calque de remplissage dégradé, masqué à la zone) ----------
-// stops : [['#hex', position 0-100], ...] ; angle en degrés ; o.radial = true pour radial
+function ellipse(name, x, y, w, h, fill, o) {
+    var l;
+    try { l = fillLayer(fill, { kind: 'ellipse', x: x, y: y, w: w, h: h }); l.name = name; return place(l, o); }
+    catch (e) { return pathShape(name, polysOf(ellipseD(x, y, w, h)), fill, o); }
+}
 function gradient(name, x, y, w, h, stops, angle, o) {
-    deselect();
-    var full = (x <= 0 && y <= 0 && x + w >= DOC.width.as('px') && y + h >= DOC.height.as('px'));
-    if (!full) { DOC.selection.select([[x, y], [x + w, y], [x + w, y + h], [x, y + h]]); }
-    try {
-        var d = new ActionDescriptor(), r = new ActionReference(), ld = new ActionDescriptor(), g = new ActionDescriptor(), gr = new ActionDescriptor();
-        r.putClass(sID('contentLayer')); d.putReference(cID('null'), r);
-        g.putUnitDouble(cID('Angl'), cID('#Ang'), angle || 90);
-        g.putEnumerated(cID('Type'), cID('GrdT'), cID(opt(o, 'radial', false) ? 'Rdl ' : 'Lnr '));
-        gr.putString(cID('Nm  '), name);
-        gr.putEnumerated(cID('GrdF'), cID('GrdF'), cID('CstS'));
-        gr.putDouble(cID('Intr'), 4096);
-        var cl = new ActionList(), tl = new ActionList(), i;
-        for (i = 0; i < stops.length; i++) {
-            var s = new ActionDescriptor();
-            s.putObject(cID('Clr '), cID('RGBC'), rgbDesc(stops[i][0]));
-            s.putEnumerated(cID('Type'), cID('Clry'), cID('UsrS'));
-            s.putInteger(cID('Lctn'), Math.round(stops[i][1] * 40.96));
-            s.putInteger(cID('Mdpn'), 50);
-            cl.putObject(cID('Clrt'), s);
-        }
-        for (i = 0; i < 2; i++) {
-            var t = new ActionDescriptor();
-            t.putUnitDouble(cID('Opct'), cID('#Prc'), 100);
-            t.putInteger(cID('Lctn'), i * 4096);
-            t.putInteger(cID('Mdpn'), 50);
-            tl.putObject(cID('TrnS'), t);
-        }
-        gr.putList(cID('Clrs'), cl); gr.putList(cID('Trns'), tl);
-        g.putObject(cID('Grad'), cID('Grdn'), gr);
-        ld.putObject(cID('Type'), sID('gradientLayer'), g);
-        d.putObject(cID('Usng'), sID('contentLayer'), ld);
-        executeAction(cID('Mk  '), d, DialogModes.NO);
-        deselect();
-        var l = DOC.activeLayer; l.name = name;
-        return place(l, o);
-    } catch (e) {
-        deselect();
-        return rect(name, x, y, w, h, stops[0][0], o);
-    }
+    var f = { gradient: stops, angle: angle, radial: opt(o, 'radial', false) };
+    return rect(name, x, y, w, h, f, o);
 }
-
-// ---------- Polygone / trait (calque de pixels) ----------
-// pts : [[x,y], [x,y], ...]
-function polygon(name, pts, hex, o) {
-    deselect();
-    var l = DOC.artLayers.add(); l.name = name;
-    DOC.selection.select(pts);
-    DOC.selection.fill(solid(hex));
-    deselect();
-    return place(l, o);
+// Cadre (contour vectoriel) : épaisseur thick, coins arrondis avec o.radius
+function frame(name, x, y, w, h, thick, fill, o) {
+    var r = opt(o, 'radius', 0);
+    var outer = polysOf(roundRectD(x, y, w, h, r)), inner = polysOf(roundRectD(x + thick, y + thick, w - 2 * thick, h - 2 * thick, Math.max(0, r - thick)));
+    return pathShape(name, outer.concat(inner), fill, o);
 }
-function line(name, x1, y1, x2, y2, thick, hex, o) {
+function polygon(name, pts, fill, o) { return pathShape(name, [pts], fill, o); }
+function line(name, x1, y1, x2, y2, thick, fill, o) {
     var dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx * dx + dy * dy) || 1;
     var nx = -dy / len * thick / 2, ny = dx / len * thick / 2;
-    return polygon(name, [[x1 + nx, y1 + ny], [x2 + nx, y2 + ny], [x2 - nx, y2 - ny], [x1 - nx, y1 - ny]], hex, o);
+    return polygon(name, [[x1 + nx, y1 + ny], [x2 + nx, y2 + ny], [x2 - nx, y2 - ny], [x1 - nx, y1 - ny]], fill, o);
+}
+// Forme libre en tracé SVG (attribut d), dessinée dans une boîte vbW×vbH puis placée en x,y,w,h
+function svgShape(name, d, vbW, vbH, x, y, w, h, fill, o) {
+    return pathShape(name, svgPolys(d, w / vbW, h / vbH, x, y, 0.75), fill, o);
+}
+// Icône vectorielle de la bibliothèque ICONS (carré size×size)
+function icon(name, key, x, y, size, fill, o) {
+    var d = ICONS[String(key).toLowerCase()];
+    if (!d) {
+        if (!inArr(MISSING_ICONS, key)) { MISSING_ICONS.push(key); }
+        return ellipse(name + ' (icône ' + key + ' à remplacer)', x, y, size, size, fill, o);
+    }
+    return svgShape(name, d, 24, 24, x, y, size, size, fill, o);
 }
 
-// ---------- Texte (calque de texte modifiable) ----------
-// x,y = coin haut-gauche du texte (align 'left'), centre-haut ('center') ou droite-haut ('right')
-// o : align, tracking (millièmes d'em), leading (px), caps, bold, italic, underline
-function text(name, content, x, y, size, font, hex, o) {
+// ---------- Textes modifiables ----------
+// x,y = haut-gauche du texte ; align 'center' : x = centre ; 'right' : x = bord droit
+function text(name, content, x, y, size, font, color, o) {
     deselect();
     var l = DOC.artLayers.add(); l.kind = LayerKind.TEXT; l.name = name;
     var t = l.textItem;
@@ -337,11 +600,12 @@ function text(name, content, x, y, size, font, hex, o) {
     var ok = false;
     try { app.fonts.getByName(font); t.font = font; ok = true; } catch (e) {}
     if (!ok) {
-        var bold = /bold|black|heavy|extra|semi|demi/i.test(font);
-        try { t.font = bold ? 'Arial-BoldMT' : 'ArialMT'; } catch (e2) {}
+        if (!inArr(MISSING_FONTS, font)) { MISSING_FONTS.push(font); }
+        var fb = opt(o, 'fallback', /black|heavy|extrabold|ultra/i.test(font) ? 'Arial-Black' : (/bold|semibold|demi/i.test(font) ? 'Arial-BoldMT' : 'ArialMT'));
+        try { app.fonts.getByName(fb); t.font = fb; } catch (e2) { try { t.font = 'ArialMT'; } catch (e3) {} }
     }
     t.size = px(size);
-    t.color = solid(hex);
+    t.color = solid(color);
     var al = opt(o, 'align', 'left');
     t.justification = al == 'center' ? Justification.CENTER : (al == 'right' ? Justification.RIGHT : Justification.LEFT);
     if (opt(o, 'tracking', null) !== null) { t.tracking = o.tracking; }
@@ -353,29 +617,49 @@ function text(name, content, x, y, size, font, hex, o) {
     t.position = [px(x), px(y + size)];
     try {
         var b = l.bounds, L = b[0].as('px'), T = b[1].as('px'), R = b[2].as('px');
+        if (opt(o, 'maxWidth', 0) > 0 && R - L > o.maxWidth) {
+            var sc = o.maxWidth / (R - L) * 100;
+            l.resize(sc, sc, AnchorPosition.TOPLEFT);
+            b = l.bounds; L = b[0].as('px'); T = b[1].as('px'); R = b[2].as('px');
+        }
         var ax = al == 'center' ? (L + R) / 2 : (al == 'right' ? R : L);
         l.translate(px(x - ax), px(y - T));
-    } catch (e3) {}
+        if (opt(o, 'rotate', 0)) { l.rotate(o.rotate, AnchorPosition.MIDDLECENTER); }
+    } catch (e4) {}
     return place(l, o);
 }
 
-// ---------- Zone image (photo, personne, objet, texture...) ----------
-// zone : [x, y, w, h] (rectangle) ou [[x,y], [x,y], ...] (contour détouré)
-// Découpée dans l'image originale si elle a été chargée, sinon rectangle gris à remplacer.
+// ---------- Photos / logos en OBJETS DYNAMIQUES ----------
+// zone : [x, y, w, h]  ou  [[x,y], [x,y], ...] (silhouette détourée)
+// o.shape : 'rect' (défaut) | 'ellipse' (photo ronde) ; o.radius : coins arrondis
+// Clic droit sur le calque > Remplacer le contenu… pour mettre sa propre photo.
 function image(name, zone, o) {
     deselect();
-    var pts = zone;
-    if (typeof zone[0] == 'number') { pts = [[zone[0], zone[1]], [zone[0] + zone[2], zone[1]], [zone[0] + zone[2], zone[1] + zone[3]], [zone[0], zone[1] + zone[3]]]; }
-    if (!REF) {
-        return polygon(name + ' (à remplacer)', pts, '#BDBDBD', o);
+    var poly = null, x, y, w, h, i;
+    if (typeof zone[0] == 'number') { x = zone[0]; y = zone[1]; w = zone[2]; h = zone[3]; }
+    else {
+        poly = zone; var x2 = -1e9, y2 = -1e9; x = 1e9; y = 1e9;
+        for (i = 0; i < zone.length; i++) { x = Math.min(x, zone[i][0]); y = Math.min(y, zone[i][1]); x2 = Math.max(x2, zone[i][0]); y2 = Math.max(y2, zone[i][1]); }
+        w = x2 - x; h = y2 - y;
     }
-    var l = REF.duplicate();
-    l.visible = true; l.name = name;
-    DOC.activeLayer = l;
-    DOC.selection.select(pts, SelectionType.REPLACE, opt(o, 'feather', 0), true);
-    DOC.selection.invert();
-    DOC.selection.clear();
-    deselect();
+    var W = DOC.width.as('px'), H = DOC.height.as('px');
+    var bx = Math.max(0, Math.round(x)), by = Math.max(0, Math.round(y));
+    var bw = Math.min(W, Math.round(x + w)) - bx, bh = Math.min(H, Math.round(y + h)) - by;
+    var box = [[bx, by], [bx + bw, by], [bx + bw, by + bh], [bx, by + bh]];
+    var l;
+    if (REF) {
+        l = REF.duplicate(); l.visible = true; DOC.activeLayer = l;
+        DOC.selection.select(box); DOC.selection.invert(); DOC.selection.clear(); deselect();
+    } else {
+        l = DOC.artLayers.add(); DOC.activeLayer = l;
+        DOC.selection.select(box); DOC.selection.fill(solid('#BDBDBD')); deselect();
+    }
+    l.name = name;
+    try { executeAction(sID('newPlacedLayer'), new ActionDescriptor(), DialogModes.NO); l = DOC.activeLayer; l.name = name; } catch (e) {}
+    var shp = opt(o, 'shape', 'rect');
+    if (poly) { vectorMask(l, [poly]); }
+    else if (shp == 'ellipse') { vectorMask(l, polysOf(ellipseD(x, y, w, h))); }
+    else if (opt(o, 'radius', 0) > 0) { vectorMask(l, polysOf(roundRectD(x, y, w, h, o.radius))); }
     return place(l, o);
 }
 
@@ -383,40 +667,270 @@ function finish() {
     deselect();
     try { BLANK.remove(); } catch (e) {}
     if (REF) { REF.visible = false; }
+    try { DOC.activeLayer = DOC.layers[0]; } catch (e2) {}
     app.preferences.rulerUnits = OLD_RU;
     app.preferences.typeUnits = OLD_TU;
-    alert('Terminé ! ' + COUNT + ' calques créés.\nPense à enregistrer en .PSD (Fichier > Enregistrer sous).');
+    var msg = 'Terminé ! ' + COUNT + ' calques créés.';
+    if (MISSING_FONTS.length) { msg += '\n\nPolices non installées (remplacées par Arial) :\n- ' + MISSING_FONTS.join('\n- '); }
+    if (MISSING_ICONS.length) { msg += '\n\nIcônes inconnues (cercles à remplacer) : ' + MISSING_ICONS.join(', '); }
+    msg += '\n\nEnregistre en .PSD : Fichier > Enregistrer sous.';
+    alert(msg);
 }
-// ===================== FIN DE LA BIBLIOTHÈQUE =====================
-
---------------------------------------------------------------------------------
-EXEMPLE DE FONCTION build() (pour une affiche 1080×1350 — adapte-la à l'image reçue)
---------------------------------------------------------------------------------
-// ===================== CONSTRUCTION (partie écrite par l'IA) =====================
-function build() {
-    createDoc('Affiche_calques', 1080, 1350, '#0E1B2C');
-    loadReference();
-
-    var fond = group('Fond');
-    gradient('Dégradé ciel', 0, 0, 1080, 900, [['#0E1B2C', 0], ['#1E3A5F', 100]], 90, { group: fond });
-    ellipse('Cercle lumineux', 600, -150, 700, 700, '#F2B705', { group: fond, opacity: 25 });
-
-    var photo = group('Photo');
-    image('Personne', [[300, 300], [780, 300], [820, 1150], [260, 1150]], { group: photo, shadow: { opacity: 40, distance: 12, size: 30 } });
-
-    var bas = group('Bandeau');
-    rect('Bandeau jaune', 0, 1150, 1080, 200, '#F2B705', { group: bas });
-    line('Filet', 240, 1185, 840, 1185, 3, '#0E1B2C', { group: bas });
-
-    var txt = group('Textes');
-    text('Titre', 'GRANDE SOIRÉE', 540, 80, 110, 'Montserrat-ExtraBold', '#FFFFFF', { group: txt, align: 'center', tracking: 20 });
-    text('Date', 'Samedi 12 décembre · 20h', 540, 1215, 48, 'Montserrat-SemiBold', '#0E1B2C', { group: txt, align: 'center' });
-    rect('Bouton', 390, 1000, 300, 90, '#FFFFFF', { group: txt, radius: 45, stroke: { color: '#F2B705', size: 4 } });
-    text('Texte bouton', 'RÉSERVER', 540, 1025, 36, 'Montserrat-Bold', '#0E1B2C', { group: txt, align: 'center' });
-
-    finish();
+function run(build) {
+    try { build(); }
+    catch (e) {
+        app.preferences.rulerUnits = OLD_RU; app.preferences.typeUnits = OLD_TU;
+        alert('Erreur ligne ' + e.line + ' : ' + e.message);
+    }
 }
-try { build(); } catch (e) { alert('Erreur ligne ' + e.line + ' : ' + e.message); }
+// ---------- Lecture d'un tracé SVG (attribut d) → contours vectoriels ----------
+// Renvoie [[ [x,y], [x,y], ... ], ...] (un tableau de points par sous-tracé),
+// mis à l'échelle (sx, sy) et décalé (ox, oy). Les courbes sont converties en
+// segments très courts (tol = longueur max d'un segment en px).
+function svgPolys(d, sx, sy, ox, oy, tol) {
+    var s = String(d), i = 0, n = s.length, polys = [], cur = null;
+    var cx = 0, cy = 0, stx = 0, sty = 0, lcx = 0, lcy = 0, lq = null, lc = null, cmd = '', prev = '';
+    tol = tol || 1;
+    var sc = Math.max(Math.abs(sx), Math.abs(sy));
+    function ws() { while (i < n && /[\s,]/.test(s.charAt(i))) { i++; } }
+    function num() {
+        ws();
+        var m = s.substr(i, 40).match(/^[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/);
+        if (!m) { throw new Error('SVG: nombre attendu à la position ' + i); }
+        i += m[0].length;
+        return parseFloat(m[0]);
+    }
+    function flag() { ws(); var c = s.charAt(i); i++; return c == '1' ? 1 : 0; }
+    function hasNum() { ws(); return i < n && /[-+.\d]/.test(s.charAt(i)); }
+    function out(x, y) { cur.push([ox + x * sx, oy + y * sy]); }
+    function moveTo(x, y) {
+        cur = []; polys.push(cur); out(x, y);
+        cx = stx = x; cy = sty = y;
+    }
+    function lineTo(x, y) { if (!cur) { moveTo(cx, cy); } out(x, y); cx = x; cy = y; }
+    function cubic(x1, y1, x2, y2, x, y) {
+        if (!cur) { moveTo(cx, cy); }
+        var len = (Math.sqrt((x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy)) + Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) + Math.sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2))) * sc;
+        var k = Math.max(2, Math.min(200, Math.ceil(len / tol))), t, u, j;
+        for (j = 1; j <= k; j++) {
+            t = j / k; u = 1 - t;
+            out(u * u * u * cx + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t * x,
+                u * u * u * cy + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y);
+        }
+        cx = x; cy = y;
+    }
+    function quad(qx, qy, x, y) {
+        cubic(cx + 2 / 3 * (qx - cx), cy + 2 / 3 * (qy - cy), x + 2 / 3 * (qx - x), y + 2 / 3 * (qy - y), x, y);
+    }
+    function arc(rx, ry, rot, large, sweep, x, y) {
+        if (!cur) { moveTo(cx, cy); }
+        var x0 = cx, y0 = cy;
+        rx = Math.abs(rx); ry = Math.abs(ry);
+        if (rx == 0 || ry == 0 || (x0 == x && y0 == y)) { lineTo(x, y); return; }
+        var phi = rot * Math.PI / 180, cp = Math.cos(phi), sp = Math.sin(phi);
+        var dx = (x0 - x) / 2, dy = (y0 - y) / 2;
+        var x1p = cp * dx + sp * dy, y1p = -sp * dx + cp * dy;
+        var lam = (x1p * x1p) / (rx * rx) + (y1p * y1p) / (ry * ry);
+        if (lam > 1) { var sl = Math.sqrt(lam); rx *= sl; ry *= sl; }
+        var num2 = rx * rx * ry * ry - rx * rx * y1p * y1p - ry * ry * x1p * x1p;
+        var den = rx * rx * y1p * y1p + ry * ry * x1p * x1p;
+        var co = Math.sqrt(Math.max(0, num2 / den)) * (large == sweep ? -1 : 1);
+        var cxp = co * rx * y1p / ry, cyp = -co * ry * x1p / rx;
+        var ccx = cp * cxp - sp * cyp + (x0 + x) / 2, ccy = sp * cxp + cp * cyp + (y0 + y) / 2;
+        function ang(ux, uy, vx, vy) {
+            var a = Math.atan2(ux * vy - uy * vx, ux * vx + uy * vy);
+            return a;
+        }
+        var t1 = ang(1, 0, (x1p - cxp) / rx, (y1p - cyp) / ry);
+        var dt = ang((x1p - cxp) / rx, (y1p - cyp) / ry, (-x1p - cxp) / rx, (-y1p - cyp) / ry);
+        if (!sweep && dt > 0) { dt -= 2 * Math.PI; } else if (sweep && dt < 0) { dt += 2 * Math.PI; }
+        var len = Math.abs(dt) * Math.max(rx, ry) * sc;
+        var k = Math.max(2, Math.min(200, Math.ceil(len / tol))), j, a;
+        for (j = 1; j <= k; j++) {
+            a = t1 + dt * j / k;
+            out(cp * rx * Math.cos(a) - sp * ry * Math.sin(a) + ccx, sp * rx * Math.cos(a) + cp * ry * Math.sin(a) + ccy);
+        }
+        cx = x; cy = y;
+    }
+    while (true) {
+        ws();
+        if (i >= n) { break; }
+        var ch = s.charAt(i);
+        if (/[a-zA-Z]/.test(ch)) { cmd = ch; i++; }
+        else if (!cmd) { throw new Error('SVG: commande attendue'); }
+        var rel = cmd == cmd.toLowerCase(), C = cmd.toUpperCase(), bx = rel ? cx : 0, by = rel ? cy : 0;
+        var x1, y1, x2, y2, x, y;
+        if (C == 'Z') {
+            cx = stx; cy = sty; cur = null; lq = lc = null; prev = 'Z';
+            continue;
+        }
+        if (C == 'M') { moveTo(bx + num(), by + num()); cmd = rel ? 'l' : 'L'; lq = lc = null; prev = 'M'; continue; }
+        if (C == 'L') { x = bx + num(); y = by + num(); lineTo(x, y); lq = lc = null; }
+        else if (C == 'H') { lineTo(bx + num(), cy); lq = lc = null; }
+        else if (C == 'V') { lineTo(cx, by + num()); lq = lc = null; }
+        else if (C == 'C') { x1 = bx + num(); y1 = by + num(); x2 = bx + num(); y2 = by + num(); x = bx + num(); y = by + num(); cubic(x1, y1, x2, y2, x, y); lc = [x2, y2]; lq = null; }
+        else if (C == 'S') { x1 = lc ? 2 * cx - lc[0] : cx; y1 = lc ? 2 * cy - lc[1] : cy; x2 = bx + num(); y2 = by + num(); x = bx + num(); y = by + num(); cubic(x1, y1, x2, y2, x, y); lc = [x2, y2]; lq = null; }
+        else if (C == 'Q') { x1 = bx + num(); y1 = by + num(); x = bx + num(); y = by + num(); quad(x1, y1, x, y); lq = [x1, y1]; lc = null; }
+        else if (C == 'T') { x1 = lq ? 2 * cx - lq[0] : cx; y1 = lq ? 2 * cy - lq[1] : cy; x = bx + num(); y = by + num(); quad(x1, y1, x, y); lq = [x1, y1]; lc = null; }
+        else if (C == 'A') { var rx = num(), ry = num(), rot = num(), la = flag(), sw = flag(); x = bx + num(); y = by + num(); arc(rx, ry, rot, la, sw, x, y); lq = lc = null; }
+        else { throw new Error('SVG: commande inconnue ' + cmd); }
+    }
+    var res = [];
+    for (var p = 0; p < polys.length; p++) { if (polys[p].length >= 3) { res.push(polys[p]); } }
+    return res;
+}
+// ---------- Icônes vectorielles (24×24) : marques = Simple Icons (CC0), pictos = Material Design Icons (Apache 2.0) ----------
+var ICONS = {};
+ICONS['facebook'] = 'M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z';
+ICONS['instagram'] = 'M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077';
+ICONS['whatsapp'] = 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z';
+ICONS['youtube'] = 'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z';
+ICONS['tiktok'] = 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z';
+ICONS['x'] = 'M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z';
+ICONS['telegram'] = 'M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z';
+ICONS['snapchat'] = 'M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301.165-.088.344-.104.464-.104.182 0 .359.029.509.09.45.149.734.479.734.838.015.449-.39.839-1.213 1.168-.089.029-.209.075-.344.119-.45.135-1.139.36-1.333.81-.09.224-.061.524.12.868l.015.015c.06.136 1.526 3.475 4.791 4.014.255.044.435.27.42.509 0 .075-.015.149-.045.225-.24.569-1.273.988-3.146 1.271-.059.091-.12.375-.164.57-.029.179-.074.36-.134.553-.076.271-.27.405-.555.405h-.03c-.135 0-.313-.031-.538-.074-.36-.075-.765-.135-1.273-.135-.3 0-.599.015-.913.074-.6.104-1.123.464-1.723.884-.853.599-1.826 1.288-3.294 1.288-.06 0-.119-.015-.18-.015h-.149c-1.468 0-2.427-.675-3.279-1.288-.599-.42-1.107-.779-1.707-.884-.314-.045-.629-.074-.928-.074-.54 0-.958.089-1.272.149-.211.043-.391.074-.54.074-.374 0-.523-.224-.583-.42-.061-.192-.09-.389-.135-.567-.046-.181-.105-.494-.166-.57-1.918-.222-2.95-.642-3.189-1.226-.031-.063-.052-.15-.055-.225-.015-.243.165-.465.42-.509 3.264-.54 4.73-3.879 4.791-4.02l.016-.029c.18-.345.224-.645.119-.869-.195-.434-.884-.658-1.332-.809-.121-.029-.24-.074-.346-.119-1.107-.435-1.257-.93-1.197-1.273.09-.479.674-.793 1.168-.793.146 0 .27.029.383.074.42.194.789.3 1.104.3.234 0 .384-.06.465-.105l-.046-.569c-.098-1.626-.225-3.651.307-4.837C7.392 1.077 10.739.807 11.727.807l.419-.015h.06z';
+ICONS['pinterest'] = 'M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z';
+ICONS['messenger'] = 'M12 0C5.24 0 0 4.952 0 11.64c0 3.499 1.434 6.521 3.769 8.61a.96.96 0 0 1 .323.683l.065 2.135a.96.96 0 0 0 1.347.85l2.381-1.053a.96.96 0 0 1 .641-.046A13 13 0 0 0 12 23.28c6.76 0 12-4.952 12-11.64S18.76 0 12 0m6.806 7.44c.522-.03.971.567.63 1.094l-4.178 6.457a.707.707 0 0 1-.977.208l-3.87-2.504a.44.44 0 0 0-.49.007l-4.363 3.01c-.637.438-1.415-.317-.995-.966l4.179-6.457a.706.706 0 0 1 .977-.21l3.87 2.505c.15.097.344.094.491-.007l4.362-3.008a.7.7 0 0 1 .364-.13';
+ICONS['threads'] = 'M18.263 11.097c-.03-3.486-1.92-5.586-5.111-5.586-2.13 0-3.922.963-4.863 2.499l2.062 1.438c.535-.843 1.272-1.543 2.628-1.543 1.528 0 2.318.85 2.544 2.431a15 15 0 0 0-2.236-.173c-4.125 0-6.068 1.867-6.068 4.336s1.943 3.99 4.804 3.99c3.139 0 5.013-2.115 5.781-4.735.798.361 1.348 1.204 1.348 2.47 0 3.387-3.907 5.232-7.22 5.232-4.885 0-8.077-3.207-8.077-8.424 0-6.392 4.223-10.487 9.9-10.487 3.808 0 5.69 1.671 6.97 3.914l2.108-1.475C21.44 2.078 18.331 0 13.663 0 6.227 0 1.168 5.277 1.168 12.934c0 7 4.953 11.066 10.856 11.066 4.878 0 9.809-2.846 9.809-7.716 0-2.545-1.46-4.231-3.569-5.187m-6.33 4.855c-1.077 0-2.026-.512-2.026-1.453 0-1.483 1.822-1.934 3.606-1.934.678 0 1.34.045 1.927.173-.422 1.927-1.671 3.215-3.508 3.214Z';
+ICONS['spotify'] = 'M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z';
+ICONS['googlemaps'] = 'M19.527 4.799c1.212 2.608.937 5.678-.405 8.173-1.101 2.047-2.744 3.74-4.098 5.614-.619.858-1.244 1.75-1.669 2.727-.141.325-.263.658-.383.992-.121.333-.224.673-.34 1.008-.109.314-.236.684-.627.687h-.007c-.466-.001-.579-.53-.695-.887-.284-.874-.581-1.713-1.019-2.525-.51-.944-1.145-1.817-1.79-2.671L19.527 4.799zM8.545 7.705l-3.959 4.707c.724 1.54 1.821 2.863 2.871 4.18.247.31.494.622.737.936l4.984-5.925-.029.01c-1.741.601-3.691-.291-4.392-1.987a3.377 3.377 0 0 1-.209-.716c-.063-.437-.077-.761-.004-1.198l.001-.007zM5.492 3.149l-.003.004c-1.947 2.466-2.281 5.88-1.117 8.77l4.785-5.689-.058-.05-3.607-3.035zM14.661.436l-3.838 4.563a.295.295 0 0 1 .027-.01c1.6-.551 3.403.15 4.22 1.626.176.319.323.683.377 1.045.068.446.085.773.012 1.22l-.003.016 3.836-4.561A8.382 8.382 0 0 0 14.67.439l-.009-.003zM9.466 5.868L14.162.285l-.047-.012A8.31 8.31 0 0 0 11.986 0a8.439 8.439 0 0 0-6.169 2.766l-.016.018 3.665 3.084z';
+ICONS['gmail'] = 'M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z';
+ICONS['applemusic'] = 'M23.994 6.124a9.23 9.23 0 00-.24-2.19c-.317-1.31-1.062-2.31-2.18-3.043a5.022 5.022 0 00-1.877-.726 10.496 10.496 0 00-1.564-.15c-.04-.003-.083-.01-.124-.013H5.986c-.152.01-.303.017-.455.026-.747.043-1.49.123-2.193.4-1.336.53-2.3 1.452-2.865 2.78-.192.448-.292.925-.363 1.408-.056.392-.088.785-.1 1.18 0 .032-.007.062-.01.093v12.223c.01.14.017.283.027.424.05.815.154 1.624.497 2.373.65 1.42 1.738 2.353 3.234 2.801.42.127.856.187 1.293.228.555.053 1.11.06 1.667.06h11.03a12.5 12.5 0 001.57-.1c.822-.106 1.596-.35 2.295-.81a5.046 5.046 0 001.88-2.207c.186-.42.293-.87.37-1.324.113-.675.138-1.358.137-2.04-.002-3.8 0-7.595-.003-11.393zm-6.423 3.99v5.712c0 .417-.058.827-.244 1.206-.29.59-.76.962-1.388 1.14-.35.1-.706.157-1.07.173-.95.045-1.773-.6-1.943-1.536a1.88 1.88 0 011.038-2.022c.323-.16.67-.25 1.018-.324.378-.082.758-.153 1.134-.24.274-.063.457-.23.51-.516a.904.904 0 00.02-.193c0-1.815 0-3.63-.002-5.443a.725.725 0 00-.026-.185c-.04-.15-.15-.243-.304-.234-.16.01-.318.035-.475.066-.76.15-1.52.303-2.28.456l-2.325.47-1.374.278c-.016.003-.032.01-.048.013-.277.077-.377.203-.39.49-.002.042 0 .086 0 .13-.002 2.602 0 5.204-.003 7.805 0 .42-.047.836-.215 1.227-.278.64-.77 1.04-1.434 1.233-.35.1-.71.16-1.075.172-.96.036-1.755-.6-1.92-1.544-.14-.812.23-1.685 1.154-2.075.357-.15.73-.232 1.108-.31.287-.06.575-.116.86-.177.383-.083.583-.323.6-.714v-.15c0-2.96 0-5.922.002-8.882 0-.123.013-.25.042-.37.07-.285.273-.448.546-.518.255-.066.515-.112.774-.165.733-.15 1.466-.296 2.2-.444l2.27-.46c.67-.134 1.34-.27 2.01-.403.22-.043.442-.088.663-.106.31-.025.523.17.554.482.008.073.012.148.012.223.002 1.91.002 3.822 0 5.732z';
+ICONS['deezer'] = 'M.693 10.024c.381 0 .693-1.256.693-2.807 0-1.55-.312-2.807-.693-2.807C.312 4.41 0 5.666 0 7.217s.312 2.808.693 2.808ZM21.038 1.56c-.364 0-.684.805-.91 2.096C19.765 1.446 19.184 0 18.526 0c-.78 0-1.464 2.036-1.784 5-.312-2.158-.788-3.536-1.325-3.536-.745 0-1.386 2.704-1.62 6.472-.442-1.932-1.083-3.145-1.793-3.145s-1.35 1.213-1.793 3.145c-.242-3.76-.874-6.463-1.628-6.463-.537 0-1.013 1.378-1.325 3.535C6.938 2.036 6.262 0 5.474 0c-.658 0-1.247 1.447-1.602 3.665-.217-1.291-.546-2.105-.91-2.105-.675 0-1.221 2.807-1.221 6.272 0 3.466.546 6.273 1.221 6.273.277 0 .537-.476.736-1.273.32 2.928.996 4.938 1.776 4.938.606 0 1.143-1.204 1.507-3.11.251 3.622.875 6.195 1.602 6.195.46 0 .875-1.023 1.187-2.677C10.142 21.6 11 24 12.004 24c1.005 0 1.863-2.4 2.235-5.822.312 1.654.727 2.677 1.186 2.677.728 0 1.352-2.573 1.603-6.195.364 1.906.9 3.11 1.507 3.11.78 0 1.455-2.01 1.775-4.938.208.797.46 1.273.737 1.273.675 0 1.22-2.807 1.22-6.273-.008-3.457-.553-6.272-1.23-6.272ZM23.307 10.024c.381 0 .693-1.256.693-2.807 0-1.55-.312-2.807-.693-2.807-.381 0-.693 1.256-.693 2.807s.312 2.808.693 2.808Z';
+ICONS['soundcloud'] = 'M23.999 14.165c-.052 1.796-1.612 3.169-3.4 3.169h-8.18a.68.68 0 0 1-.675-.683V7.862a.747.747 0 0 1 .452-.724s.75-.513 2.333-.513a5.364 5.364 0 0 1 2.763.755 5.433 5.433 0 0 1 2.57 3.54c.282-.08.574-.121.868-.12.884 0 1.73.358 2.347.992s.948 1.49.922 2.373ZM10.721 8.421c.247 2.98.427 5.697 0 8.672a.264.264 0 0 1-.53 0c-.395-2.946-.22-5.718 0-8.672a.264.264 0 0 1 .53 0ZM9.072 9.448c.285 2.659.37 4.986-.006 7.655a.277.277 0 0 1-.55 0c-.331-2.63-.256-5.02 0-7.655a.277.277 0 0 1 .556 0Zm-1.663-.257c.27 2.726.39 5.171 0 7.904a.266.266 0 0 1-.532 0c-.38-2.69-.257-5.21 0-7.904a.266.266 0 0 1 .532 0Zm-1.647.77a26.108 26.108 0 0 1-.008 7.147.272.272 0 0 1-.542 0 27.955 27.955 0 0 1 0-7.147.275.275 0 0 1 .55 0Zm-1.67 1.769c.421 1.865.228 3.5-.029 5.388a.257.257 0 0 1-.514 0c-.21-1.858-.398-3.549 0-5.389a.272.272 0 0 1 .543 0Zm-1.655-.273c.388 1.897.26 3.508-.01 5.412-.026.28-.514.283-.54 0-.244-1.878-.347-3.54-.01-5.412a.283.283 0 0 1 .56 0Zm-1.668.911c.4 1.268.257 2.292-.026 3.572a.257.257 0 0 1-.514 0c-.241-1.262-.354-2.312-.023-3.572a.283.283 0 0 1 .563 0Z';
+ICONS['twitch'] = 'M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z';
+ICONS['discord'] = 'M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z';
+ICONS['paypal'] = 'M15.607 4.653H8.941L6.645 19.251H1.82L4.862 0h7.995c3.754 0 6.375 2.294 6.473 5.513-.648-.478-2.105-.86-3.722-.86m6.57 5.546c0 3.41-3.01 6.853-6.958 6.853h-2.493L11.595 24H6.74l1.845-11.538h3.592c4.208 0 7.346-3.634 7.153-6.949a5.24 5.24 0 0 1 2.848 4.686M9.653 5.546h6.408c.907 0 1.942.222 2.363.541-.195 2.741-2.655 5.483-6.441 5.483H8.714Z';
+ICONS['apple'] = 'M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701';
+ICONS['googleplay'] = 'M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z';
+ICONS['appstore'] = 'M8.8086 14.9194l6.1107-11.0368c.0837-.1513.1682-.302.2437-.4584.0685-.142.1267-.2854.1646-.4403.0803-.3259.0588-.6656-.066-.9767-.1238-.3095-.3417-.5678-.6201-.7355a1.4175 1.4175 0 0 0-.921-.1924c-.3207.043-.6135.1935-.8443.4288-.1094.1118-.1996.2361-.2832.369-.092.1463-.175.2979-.259.4492l-.3864.6979-.3865-.6979c-.0837-.1515-.1667-.303-.2587-.4492-.0837-.1329-.1739-.2572-.2835-.369-.2305-.2353-.5233-.3857-.844-.429a1.4181 1.4181 0 0 0-.921.1926c-.2784.1677-.4964.426-.6203.7355-.1246.311-.1461.6508-.066.9767.038.155.0962.2984.1648.4403.0753.1564.1598.307.2437.4584l1.248 2.2543-4.8625 8.7825H2.0295c-.1676 0-.3351-.0007-.5026.0092-.1522.009-.3004.0284-.448.0714-.3108.0906-.5822.2798-.7783.548-.195.2665-.3006.5929-.3006.9279 0 .3352.1057.6612.3006.9277.196.2683.4675.4575.7782.548.1477.043.296.0623.4481.0715.1675.01.335.009.5026.009h13.0974c.0171-.0357.059-.1294.1-.2697.415-1.4151-.6156-2.843-2.0347-2.843zM3.113 18.5418l-.7922 1.5008c-.0818.1553-.1644.31-.2384.4705-.067.1458-.124.293-.1611.452-.0785.3346-.0576.6834.0645 1.0029.1212.3175.3346.583.607.7549.2727.172.5891.2416.9013.1975.3139-.044.6005-.1986.8263-.4402.1072-.1148.1954-.2424.2772-.3787.0902-.1503.1714-.3059.2535-.4612L6 19.4636c-.0896-.149-.9473-1.4704-2.887-.9218m20.5861-3.0056a1.4707 1.4707 0 0 0-.779-.5407c-.1476-.0425-.2961-.0616-.4483-.0705-.1678-.0099-.3352-.0091-.503-.0091H18.648l-4.3891-7.817c-.6655.7005-.9632 1.485-1.0773 2.1976-.1655 1.0333.0367 2.0934.546 3.0004l5.2741 9.3933c.084.1494.167.299.2591.4435.0837.131.1739.2537.2836.364.231.2323.5238.3809.8449.4232.3192.0424.643-.0244.9217-.1899.2784-.1653.4968-.4204.621-.7257.1246-.3072.146-.6425.0658-.9641-.0381-.1529-.0962-.2945-.165-.4346-.0753-.1543-.1598-.303-.2438-.4524l-1.216-2.1662h1.596c.1677 0 .3351.0009.5029-.009.1522-.009.3007-.028.4483-.0705a1.4707 1.4707 0 0 0 .779-.5407A1.5386 1.5386 0 0 0 24 16.452a1.539 1.539 0 0 0-.3009-.9158Z';
+ICONS['visa'] = 'M9.112 8.262L5.97 15.758H3.92L2.374 9.775c-.094-.368-.175-.503-.461-.658C1.447 8.864.677 8.627 0 8.479l.046-.217h3.3a.904.904 0 01.894.764l.817 4.338 2.018-5.102zm8.033 5.049c.008-1.979-2.736-2.088-2.717-2.972.006-.269.262-.555.822-.628a3.66 3.66 0 011.913.336l.34-1.59a5.207 5.207 0 00-1.814-.333c-1.917 0-3.266 1.02-3.278 2.479-.012 1.079.963 1.68 1.698 2.04.756.367 1.01.603 1.006.931-.005.504-.602.725-1.16.734-.975.015-1.54-.263-1.992-.473l-.351 1.642c.453.208 1.289.39 2.156.398 2.037 0 3.37-1.006 3.377-2.564m5.061 2.447H24l-1.565-7.496h-1.656a.883.883 0 00-.826.55l-2.909 6.946h2.036l.405-1.12h2.488zm-2.163-2.656l1.02-2.815.588 2.815zm-8.16-4.84l-1.603 7.496H8.34l1.605-7.496z';
+ICONS['mastercard'] = 'M11.343 18.031c.058.049.12.098.181.146-1.177.783-2.59 1.238-4.107 1.238C3.32 19.416 0 16.096 0 12c0-4.095 3.32-7.416 7.416-7.416 1.518 0 2.931.456 4.105 1.238-.06.051-.12.098-.165.15C9.6 7.489 8.595 9.688 8.595 12c0 2.311 1.001 4.51 2.748 6.031zm5.241-13.447c-1.52 0-2.931.456-4.105 1.238.06.051.12.098.165.15C14.4 7.489 15.405 9.688 15.405 12c0 2.31-1.001 4.507-2.748 6.031-.058.049-.12.098-.181.146 1.177.783 2.588 1.238 4.107 1.238C20.68 19.416 24 16.096 24 12c0-4.094-3.32-7.416-7.416-7.416zM12 6.174c-.096.075-.189.15-.28.231C10.156 7.764 9.169 9.765 9.169 12c0 2.236.987 4.236 2.551 5.595.09.08.185.158.28.232.096-.074.189-.152.28-.232 1.563-1.359 2.551-3.359 2.551-5.595 0-2.235-.987-4.236-2.551-5.595-.09-.08-.184-.156-.28-.231z';
+ICONS['google'] = 'M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z';
+ICONS['airbnb'] = 'M12.001 18.275c-1.353-1.697-2.148-3.184-2.413-4.457-.263-1.027-.16-1.848.291-2.465.477-.71 1.188-1.056 2.121-1.056s1.643.345 2.12 1.063c.446.61.558 1.432.286 2.465-.291 1.298-1.085 2.785-2.412 4.458zm9.601 1.14c-.185 1.246-1.034 2.28-2.2 2.783-2.253.98-4.483-.583-6.392-2.704 3.157-3.951 3.74-7.028 2.385-9.018-.795-1.14-1.933-1.695-3.394-1.695-2.944 0-4.563 2.49-3.927 5.382.37 1.565 1.352 3.343 2.917 5.332-.98 1.085-1.91 1.856-2.732 2.333-.636.344-1.245.558-1.828.609-2.679.399-4.778-2.2-3.825-4.88.132-.345.395-.98.845-1.961l.025-.053c1.464-3.178 3.242-6.79 5.285-10.795l.053-.132.58-1.116c.45-.822.635-1.19 1.351-1.643.346-.21.77-.315 1.246-.315.954 0 1.698.558 2.016 1.007.158.239.345.557.582.953l.558 1.089.08.159c2.041 4.004 3.821 7.608 5.279 10.794l.026.025.533 1.22.318.764c.243.613.294 1.222.213 1.858zm1.22-2.39c-.186-.583-.505-1.271-.9-2.094v-.03c-1.889-4.006-3.642-7.608-5.307-10.844l-.111-.163C15.317 1.461 14.468 0 12.001 0c-2.44 0-3.476 1.695-4.535 3.898l-.081.16c-1.669 3.236-3.421 6.843-5.303 10.847v.053l-.559 1.22c-.21.504-.317.768-.345.847C-.172 20.74 2.611 24 5.98 24c.027 0 .132 0 .265-.027h.372c1.75-.213 3.554-1.325 5.384-3.317 1.829 1.989 3.635 3.104 5.382 3.317h.372c.133.027.239.027.265.027 3.37.003 6.152-3.261 4.802-6.975z';
+ICONS['uber'] = 'M0 7.97v4.958c0 1.867 1.302 3.101 3 3.101.826 0 1.562-.316 2.094-.87v.736H6.27V7.97H5.082v4.888c0 1.257-.85 2.106-1.947 2.106-1.11 0-1.946-.827-1.946-2.106V7.971H0zm7.44 0v7.925h1.13v-.725c.521.532 1.257.86 2.06.86a3.006 3.006 0 0 0 3.034-3.01 3.01 3.01 0 0 0-3.033-3.024 2.86 2.86 0 0 0-2.049.861V7.971H7.439zm9.869 2.038c-1.687 0-2.965 1.37-2.965 3 0 1.72 1.334 3.01 3.066 3.01 1.053 0 1.913-.463 2.49-1.233l-.826-.611c-.43.577-.996.847-1.664.847-.973 0-1.753-.7-1.912-1.64h4.697v-.373c0-1.72-1.222-3-2.886-3zm6.295.068c-.634 0-1.098.294-1.381.758v-.713h-1.131v5.774h1.142V12.61c0-.894.544-1.47 1.291-1.47H24v-1.065h-.396zm-6.319.928c.85 0 1.564.588 1.756 1.47H15.52c.203-.882.916-1.47 1.765-1.47zm-6.732.012c1.086 0 1.98.883 1.98 2.004a1.993 1.993 0 0 1-1.98 2.001A1.989 1.989 0 0 1 8.56 13.02a1.99 1.99 0 0 1 1.992-2.004z';
+ICONS['netflix'] = 'm5.398 0 8.348 23.602c2.346.059 4.856.398 4.856.398L10.113 0H5.398zm8.489 0v9.172l4.715 13.33V0h-4.715zM5.398 1.5V24c1.873-.225 2.81-.312 4.715-.398V14.83L5.398 1.5z';
+ICONS['zoom'] = 'M5.033 14.649H.743a.74.74 0 0 1-.686-.458.74.74 0 0 1 .16-.808L3.19 10.41H1.06A1.06 1.06 0 0 1 0 9.35h3.957c.301 0 .57.18.686.458a.74.74 0 0 1-.161.808L1.51 13.59h2.464c.585 0 1.06.475 1.06 1.06zM24 11.338c0-1.14-.927-2.066-2.066-2.066-.61 0-1.158.265-1.537.686a2.061 2.061 0 0 0-1.536-.686c-1.14 0-2.066.926-2.066 2.066v3.311a1.06 1.06 0 0 0 1.06-1.06v-2.251a1.004 1.004 0 0 1 2.013 0v2.251c0 .586.474 1.06 1.06 1.06v-3.311a1.004 1.004 0 0 1 2.012 0v2.251c0 .586.475 1.06 1.06 1.06zM16.265 12a2.728 2.728 0 1 1-5.457 0 2.728 2.728 0 0 1 5.457 0zm-1.06 0a1.669 1.669 0 1 0-3.338 0 1.669 1.669 0 0 0 3.338 0zm-4.82 0a2.728 2.728 0 1 1-5.458 0 2.728 2.728 0 0 1 5.457 0zm-1.06 0a1.669 1.669 0 1 0-3.338 0 1.669 1.669 0 0 0 3.338 0z';
+ICONS['vimeo'] = 'M23.9765 6.4168c-.105 2.338-1.739 5.5429-4.894 9.6088-3.2679 4.247-6.0258 6.3699-8.2898 6.3699-1.409 0-2.578-1.294-3.553-3.881l-1.9179-7.1138c-.719-2.584-1.488-3.878-2.312-3.878-.179 0-.806.378-1.8809 1.132l-1.129-1.457a315.06 315.06 0 003.501-3.1279c1.579-1.368 2.765-2.085 3.5539-2.159 1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.5069.5389 2.45 1.1309 3.674 1.7759 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.8679 3.434-5.7568 6.7619-5.6368 2.4729.06 3.6279 1.664 3.4929 4.7969z';
+ICONS['reddit'] = 'M12 0C5.373 0 0 5.373 0 12c0 3.314 1.343 6.314 3.515 8.485l-2.286 2.286C.775 23.225 1.097 24 1.738 24H12c6.627 0 12-5.373 12-12S18.627 0 12 0Zm4.388 3.199c1.104 0 1.999.895 1.999 1.999 0 1.105-.895 2-1.999 2-.946 0-1.739-.657-1.947-1.539v.002c-1.147.162-2.032 1.15-2.032 2.341v.007c1.776.067 3.4.567 4.686 1.363.473-.363 1.064-.58 1.707-.58 1.547 0 2.802 1.254 2.802 2.802 0 1.117-.655 2.081-1.601 2.531-.088 3.256-3.637 5.876-7.997 5.876-4.361 0-7.905-2.617-7.998-5.87-.954-.447-1.614-1.415-1.614-2.538 0-1.548 1.255-2.802 2.803-2.802.645 0 1.239.218 1.712.585 1.275-.79 2.881-1.291 4.64-1.365v-.01c0-1.663 1.263-3.034 2.88-3.207.188-.911.993-1.595 1.959-1.595Zm-8.085 8.376c-.784 0-1.459.78-1.506 1.797-.047 1.016.64 1.429 1.426 1.429.786 0 1.371-.369 1.418-1.385.047-1.017-.553-1.841-1.338-1.841Zm7.406 0c-.786 0-1.385.824-1.338 1.841.047 1.017.634 1.385 1.418 1.385.785 0 1.473-.413 1.426-1.429-.046-1.017-.721-1.797-1.506-1.797Zm-3.703 4.013c-.974 0-1.907.048-2.77.135-.147.015-.241.168-.183.305.483 1.154 1.622 1.964 2.953 1.964 1.33 0 2.47-.81 2.953-1.964.057-.137-.037-.29-.184-.305-.863-.087-1.795-.135-2.769-.135Z';
+ICONS['linkedin'] = 'M19 3A2 2 0 0 1 21 5V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H19M18.5 18.5V13.2A3.26 3.26 0 0 0 15.24 9.94C14.39 9.94 13.4 10.46 12.92 11.24V10.13H10.13V18.5H12.92V13.57C12.92 12.8 13.54 12.17 14.31 12.17A1.4 1.4 0 0 1 15.71 13.57V18.5H18.5M6.88 8.56A1.68 1.68 0 0 0 8.56 6.88C8.56 5.95 7.81 5.19 6.88 5.19A1.69 1.69 0 0 0 5.19 6.88C5.19 7.81 5.95 8.56 6.88 8.56M8.27 18.5V10.13H5.5V18.5H8.27Z';
+ICONS['phone'] = 'M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z';
+ICONS['telephone'] = 'M12,3C7.46,3 3.34,4.78 0.29,7.67C0.11,7.85 0,8.1 0,8.38C0,8.66 0.11,8.91 0.29,9.09L2.77,11.57C2.95,11.75 3.2,11.86 3.5,11.86C3.75,11.86 4,11.75 4.18,11.58C4.97,10.84 5.87,10.22 6.84,9.73C7.17,9.57 7.4,9.23 7.4,8.83V5.73C8.85,5.25 10.39,5 12,5C13.59,5 15.14,5.25 16.59,5.72V8.82C16.59,9.21 16.82,9.56 17.15,9.72C18.13,10.21 19,10.84 19.82,11.57C20,11.75 20.25,11.85 20.5,11.85C20.8,11.85 21.05,11.74 21.23,11.56L23.71,9.08C23.89,8.9 24,8.65 24,8.37C24,8.09 23.88,7.85 23.7,7.67C20.65,4.78 16.53,3 12,3M9,7V10C9,10 3,15 3,18V22H21V18C21,15 15,10 15,10V7H13V9H11V7H9M12,12A4,4 0 0,1 16,16A4,4 0 0,1 12,20A4,4 0 0,1 8,16A4,4 0 0,1 12,12M12,13.5A2.5,2.5 0 0,0 9.5,16A2.5,2.5 0 0,0 12,18.5A2.5,2.5 0 0,0 14.5,16A2.5,2.5 0 0,0 12,13.5Z';
+ICONS['mobile'] = 'M17,19H7V5H17M17,1H7C5.89,1 5,1.89 5,3V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V3C19,1.89 18.1,1 17,1Z';
+ICONS['email'] = 'M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z';
+ICONS['email_outline'] = 'M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6M20 6L12 11L4 6H20M20 18H4V8L12 13L20 8V18Z';
+ICONS['location'] = 'M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z';
+ICONS['location_outline'] = 'M12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5M12,2A7,7 0 0,1 19,9C19,14.25 12,22 12,22C12,22 5,14.25 5,9A7,7 0 0,1 12,2M12,4A5,5 0 0,0 7,9C7,10 7,12 12,18.71C17,12 17,10 17,9A5,5 0 0,0 12,4Z';
+ICONS['web'] = 'M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z';
+ICONS['calendar'] = 'M19,19H5V8H19M16,1V3H8V1H6V3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3H18V1M17,12H12V17H17V12Z';
+ICONS['calendar_outline'] = 'M7 11H9V13H7V11M21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H6V1H8V3H16V1H18V3H19C20.11 3 21 3.9 21 5M5 7H19V5H5V7M19 19V9H5V19H19M15 13V11H17V13H15M11 13V11H13V13H11M7 15H9V17H7V15M15 17V15H17V17H15M11 17V15H13V17H11Z';
+ICONS['clock'] = 'M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z';
+ICONS['clock_filled'] = 'M12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22C17.5 22 22 17.5 22 12S17.5 2 12 2M16.3 15.2L11 12.3V7H12.5V11.4L17 13.9L16.3 15.2Z';
+ICONS['ticket'] = 'M15.58,16.8L12,14.5L8.42,16.8L9.5,12.68L6.21,10L10.46,9.74L12,5.8L13.54,9.74L17.79,10L14.5,12.68M20,12C20,10.89 20.9,10 22,10V6C22,4.89 21.1,4 20,4H4A2,2 0 0,0 2,6V10C3.11,10 4,10.9 4,12A2,2 0 0,1 2,14V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V14A2,2 0 0,1 20,12Z';
+ICONS['user'] = 'M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z';
+ICONS['users'] = 'M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z';
+ICONS['home'] = 'M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z';
+ICONS['cart'] = 'M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75C7.17,14.7 7.18,14.66 7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z';
+ICONS['shopping_bag'] = 'M12,13A5,5 0 0,1 7,8H9A3,3 0 0,0 12,11A3,3 0 0,0 15,8H17A5,5 0 0,1 12,13M12,3A3,3 0 0,1 15,6H9A3,3 0 0,1 12,3M19,6H17A5,5 0 0,0 12,1A5,5 0 0,0 7,6H5C3.89,6 3,6.89 3,8V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V8C21,6.89 20.1,6 19,6Z';
+ICONS['star'] = 'M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z';
+ICONS['star_outline'] = 'M12,15.39L8.24,17.66L9.23,13.38L5.91,10.5L10.29,10.13L12,6.09L13.71,10.13L18.09,10.5L14.77,13.38L15.76,17.66M22,9.24L14.81,8.63L12,2L9.19,8.63L2,9.24L7.45,13.97L5.82,21L12,17.27L18.18,21L16.54,13.97L22,9.24Z';
+ICONS['heart'] = 'M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z';
+ICONS['heart_outline'] = 'M12.1,18.55L12,18.65L11.89,18.55C7.14,14.24 4,11.39 4,8.5C4,6.5 5.5,5 7.5,5C9.04,5 10.54,6 11.07,7.36H12.93C13.46,6 14.96,5 16.5,5C18.5,5 20,6.5 20,8.5C20,11.39 16.86,14.24 12.1,18.55M16.5,3C14.76,3 13.09,3.81 12,5.08C10.91,3.81 9.24,3 7.5,3C4.42,3 2,5.41 2,8.5C2,12.27 5.4,15.36 10.55,20.03L12,21.35L13.45,20.03C18.6,15.36 22,12.27 22,8.5C22,5.41 19.58,3 16.5,3Z';
+ICONS['check'] = 'M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z';
+ICONS['check_circle'] = 'M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z';
+ICONS['close'] = 'M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z';
+ICONS['arrow_right'] = 'M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z';
+ICONS['arrow_left'] = 'M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z';
+ICONS['arrow_down'] = 'M11,4H13V16L18.5,10.5L19.92,11.92L12,19.84L4.08,11.92L5.5,10.5L11,16V4Z';
+ICONS['arrow_up'] = 'M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z';
+ICONS['chevron_right'] = 'M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z';
+ICONS['play'] = 'M8,5.14V19.14L19,12.14L8,5.14Z';
+ICONS['play_circle'] = 'M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z';
+ICONS['info'] = 'M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z';
+ICONS['wifi'] = 'M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21M12,3C7.95,3 4.21,4.34 1.2,6.6L3,9C5.5,7.12 8.62,6 12,6C15.38,6 18.5,7.12 21,9L22.8,6.6C19.79,4.34 16.05,3 12,3M12,9C9.3,9 6.81,9.89 4.8,11.4L6.6,13.8C8.1,12.67 9.97,12 12,12C14.03,12 15.9,12.67 17.4,13.8L19.2,11.4C17.19,9.89 14.7,9 12,9Z';
+ICONS['car'] = 'M5,11L6.5,6.5H17.5L19,11M17.5,16A1.5,1.5 0 0,1 16,14.5A1.5,1.5 0 0,1 17.5,13A1.5,1.5 0 0,1 19,14.5A1.5,1.5 0 0,1 17.5,16M6.5,16A1.5,1.5 0 0,1 5,14.5A1.5,1.5 0 0,1 6.5,13A1.5,1.5 0 0,1 8,14.5A1.5,1.5 0 0,1 6.5,16M18.92,6C18.72,5.42 18.16,5 17.5,5H6.5C5.84,5 5.28,5.42 5.08,6L3,12V20A1,1 0 0,0 4,21H5A1,1 0 0,0 6,20V19H18V20A1,1 0 0,0 19,21H20A1,1 0 0,0 21,20V12L18.92,6Z';
+ICONS['bus'] = 'M18,11H6V6H18M16.5,17A1.5,1.5 0 0,1 15,15.5A1.5,1.5 0 0,1 16.5,14A1.5,1.5 0 0,1 18,15.5A1.5,1.5 0 0,1 16.5,17M7.5,17A1.5,1.5 0 0,1 6,15.5A1.5,1.5 0 0,1 7.5,14A1.5,1.5 0 0,1 9,15.5A1.5,1.5 0 0,1 7.5,17M4,16C4,16.88 4.39,17.67 5,18.22V20A1,1 0 0,0 6,21H7A1,1 0 0,0 8,20V19H16V20A1,1 0 0,0 17,21H18A1,1 0 0,0 19,20V18.22C19.61,17.67 20,16.88 20,16V6C20,2.5 16.42,2 12,2C7.58,2 4,2.5 4,6V16Z';
+ICONS['airplane'] = 'M20.56 3.91C21.15 4.5 21.15 5.45 20.56 6.03L16.67 9.92L18.79 19.11L17.38 20.53L13.5 13.1L9.6 17L9.96 19.47L8.89 20.53L7.13 17.35L3.94 15.58L5 14.5L7.5 14.87L11.37 11L3.94 7.09L5.36 5.68L14.55 7.8L18.44 3.91C19 3.33 20 3.33 20.56 3.91Z';
+ICONS['music'] = 'M21,3V15.5A3.5,3.5 0 0,1 17.5,19A3.5,3.5 0 0,1 14,15.5A3.5,3.5 0 0,1 17.5,12C18.04,12 18.55,12.12 19,12.34V6.47L9,8.6V17.5A3.5,3.5 0 0,1 5.5,21A3.5,3.5 0 0,1 2,17.5A3.5,3.5 0 0,1 5.5,14C6.04,14 6.55,14.12 7,14.34V6L21,3Z';
+ICONS['microphone'] = 'M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z';
+ICONS['food'] = 'M18.06 23H19.72C20.56 23 21.25 22.35 21.35 21.53L23 5.05H18V1H16.03V5.05H11.06L11.36 7.39C13.07 7.86 14.67 8.71 15.63 9.65C17.07 11.07 18.06 12.54 18.06 14.94V23M1 22V21H16.03V22C16.03 22.54 15.58 23 15 23H2C1.45 23 1 22.54 1 22M16.03 15C16.03 7 1 7 1 15H16.03M1 17H16V19H1V17Z';
+ICONS['restaurant'] = 'M11,9H9V2H7V9H5V2H3V9C3,11.12 4.66,12.84 6.75,12.97V22H9.25V12.97C11.34,12.84 13,11.12 13,9V2H11V9M16,6V14H18.5V22H21V2C18.24,2 16,4.24 16,6Z';
+ICONS['coffee'] = 'M2,21H20V19H2M20,8H18V5H20M20,3H4V13A4,4 0 0,0 8,17H14A4,4 0 0,0 18,13V10H20A2,2 0 0,0 22,8V5C22,3.89 21.1,3 20,3Z';
+ICONS['drink'] = 'M7.5,7L5.5,5H18.5L16.5,7M11,13V19H6V21H18V19H13V13L21,5V3H3V5L11,13Z';
+ICONS['beer'] = 'M4,2H19L17,22H6L4,2M6.2,4L7.8,20H8.8L7.43,6.34C8.5,6 9.89,5.89 11,7C12.56,8.56 15.33,7.69 16.5,7.23L16.8,4H6.2Z';
+ICONS['cash'] = 'M3,6H21V18H3V6M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M7,8A2,2 0 0,1 5,10V14A2,2 0 0,1 7,16H17A2,2 0 0,1 19,14V10A2,2 0 0,1 17,8H7Z';
+ICONS['credit_card'] = 'M20 4H4A2 2 0 0 0 2 6V18A2 2 0 0 0 4 20H20A2 2 0 0 0 22 18V6A2 2 0 0 0 20 4M20 11H4V8H20Z';
+ICONS['gift'] = 'M9.06,1.93C7.17,1.92 5.33,3.74 6.17,6H3A2,2 0 0,0 1,8V10A1,1 0 0,0 2,11H11V8H13V11H22A1,1 0 0,0 23,10V8A2,2 0 0,0 21,6H17.83C19,2.73 14.6,0.42 12.57,3.24L12,4L11.43,3.22C10.8,2.33 9.93,1.94 9.06,1.93M9,4C9.89,4 10.34,5.08 9.71,5.71C9.08,6.34 8,5.89 8,5A1,1 0 0,1 9,4M15,4C15.89,4 16.34,5.08 15.71,5.71C15.08,6.34 14,5.89 14,5A1,1 0 0,1 15,4M2,12V20A2,2 0 0,0 4,22H20A2,2 0 0,0 22,20V12H13V20H11V12H2Z';
+ICONS['school'] = 'M12,3L1,9L12,15L21,10.09V17H23V9M5,13.18V17.18L12,21L19,17.18V13.18L12,17L5,13.18Z';
+ICONS['book'] = 'M12 21.5C10.65 20.65 8.2 20 6.5 20C4.85 20 3.15 20.3 1.75 21.05C1.65 21.1 1.6 21.1 1.5 21.1C1.25 21.1 1 20.85 1 20.6V6C1.6 5.55 2.25 5.25 3 5C4.11 4.65 5.33 4.5 6.5 4.5C8.45 4.5 10.55 4.9 12 6C13.45 4.9 15.55 4.5 17.5 4.5C18.67 4.5 19.89 4.65 21 5C21.75 5.25 22.4 5.55 23 6V20.6C23 20.85 22.75 21.1 22.5 21.1C22.4 21.1 22.35 21.1 22.25 21.05C20.85 20.3 19.15 20 17.5 20C15.8 20 13.35 20.65 12 21.5M12 8V19.5C13.35 18.65 15.8 18 17.5 18C18.7 18 19.9 18.15 21 18.5V7C19.9 6.65 18.7 6.5 17.5 6.5C15.8 6.5 13.35 7.15 12 8M13 11.5C14.11 10.82 15.6 10.5 17.5 10.5C18.41 10.5 19.26 10.59 20 10.78V9.23C19.13 9.08 18.29 9 17.5 9C15.73 9 14.23 9.28 13 9.84V11.5M17.5 11.67C15.79 11.67 14.29 11.93 13 12.46V14.15C14.11 13.5 15.6 13.16 17.5 13.16C18.54 13.16 19.38 13.24 20 13.4V11.9C19.13 11.74 18.29 11.67 17.5 11.67M20 14.57C19.13 14.41 18.29 14.33 17.5 14.33C15.67 14.33 14.17 14.6 13 15.13V16.82C14.11 16.16 15.6 15.83 17.5 15.83C18.54 15.83 19.38 15.91 20 16.07V14.57Z';
+ICONS['church'] = 'M18 12.22V9L13 6.5V5H15V3H13V1H11V3H9V5H11V6.5L6 9V12.22L2 14V22H10V19C10 17.9 10.9 17 12 17S14 17.9 14 19V22H22V14L18 12.22M12 13.5C11.17 13.5 10.5 12.83 10.5 12S11.17 10.5 12 10.5 13.5 11.17 13.5 12 12.83 13.5 12 13.5Z';
+ICONS['mosque'] = 'M7 8H17C17.3 8 17.6 8.1 17.8 8.1C17.9 7.8 18 7.4 18 7.1C18 5.8 17.4 4.6 16.3 3.9L12 1L7.7 3.8C6.7 4.6 6 5.8 6 7.1C6 7.5 6.1 7.8 6.2 8.1C6.4 8.1 6.7 8 7 8M24 7C24 5.9 22 4 22 4S20 5.9 20 7C20 7.7 20.4 8.4 21 8.7V13H19V11C19 9.9 18.1 9 17 9H7C5.9 9 5 9.9 5 11V13H3V8.7C3.6 8.4 4 7.7 4 7C4 5.9 2 4 2 4S0 5.9 0 7C0 7.7 .4 8.4 1 8.7V21H10V17C10 15.9 10.9 15 12 15S14 15.9 14 17V21H23V8.7C23.6 8.4 24 7.7 24 7Z';
+ICONS['hospital'] = 'M18,14H14V18H10V14H6V10H10V6H14V10H18M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z';
+ICONS['medical'] = 'M10,3L8,5V7H5C3.85,7 3.12,8 3,9L2,19C1.88,20 2.54,21 4,21H20C21.46,21 22.12,20 22,19L21,9C20.88,8 20.06,7 19,7H16V5L14,3H10M10,5H14V7H10V5M11,10H13V13H16V15H13V18H11V15H8V13H11V10Z';
+ICONS['tooth'] = 'M7,2C4,2 2,5 2,8C2,10.11 3,13 4,14C5,15 6,22 8,22C12.54,22 10,15 12,15C14,15 11.46,22 16,22C18,22 19,15 20,14C21,13 22,10.11 22,8C22,5 20,2 17,2C14,2 14,3 12,3C10,3 10,2 7,2Z';
+ICONS['baby'] = 'M14.5,9.25A1.25,1.25 0 0,1 15.75,10.5A1.25,1.25 0 0,1 14.5,11.75A1.25,1.25 0 0,1 13.25,10.5A1.25,1.25 0 0,1 14.5,9.25M9.5,9.25A1.25,1.25 0 0,1 10.75,10.5A1.25,1.25 0 0,1 9.5,11.75A1.25,1.25 0 0,1 8.25,10.5A1.25,1.25 0 0,1 9.5,9.25M7.5,14H16.5C15.74,15.77 14,17 12,17C10,17 8.26,15.77 7.5,14M1,12C1,10.19 2.2,8.66 3.86,8.17C5.29,5.11 8.4,3 12,3C15.6,3 18.71,5.11 20.15,8.17C21.8,8.66 23,10.19 23,12C23,13.81 21.8,15.34 20.15,15.83C18.71,18.89 15.6,21 12,21C8.4,21 5.29,18.89 3.86,15.83C2.2,15.34 1,13.81 1,12M12,5C8.82,5 6.14,7.12 5.28,10H5A2,2 0 0,0 3,12A2,2 0 0,0 5,14H5.28C6.14,16.88 8.82,19 12,19C15.18,19 17.86,16.88 18.72,14H19A2,2 0 0,0 21,12A2,2 0 0,0 19,10H18.72C17.86,7.12 15.18,5 12,5Z';
+ICONS['party'] = 'M14.53 1.45L13.45 2.53L15.05 4.13C15.27 4.38 15.38 4.67 15.38 5S15.27 5.64 15.05 5.86L11.5 9.47L12.5 10.55L16.13 6.94C16.66 6.35 16.92 5.7 16.92 5C16.92 4.3 16.66 3.64 16.13 3.05L14.53 1.45M10.55 3.47L9.47 4.55L10.08 5.11C10.3 5.33 10.41 5.63 10.41 6S10.3 6.67 10.08 6.89L9.47 7.45L10.55 8.53L11.11 7.92C11.64 7.33 11.91 6.69 11.91 6C11.91 5.28 11.64 4.63 11.11 4.03L10.55 3.47M21 5.06C20.31 5.06 19.67 5.33 19.08 5.86L13.45 11.5L14.53 12.5L20.11 6.94C20.36 6.69 20.66 6.56 21 6.56S21.64 6.69 21.89 6.94L22.5 7.55L23.53 6.47L22.97 5.86C22.38 5.33 21.72 5.06 21 5.06M7 8L2 22L16 17L7 8M19 11.06C18.3 11.06 17.66 11.33 17.06 11.86L15.47 13.45L16.55 14.53L18.14 12.94C18.39 12.69 18.67 12.56 19 12.56C19.33 12.56 19.63 12.69 19.88 12.94L21.5 14.53L22.55 13.5L20.95 11.86C20.36 11.33 19.7 11.06 19 11.06Z';
+ICONS['cake'] = 'M12,6C13.11,6 14,5.1 14,4C14,3.62 13.9,3.27 13.71,2.97L12,0L10.29,2.97C10.1,3.27 10,3.62 10,4A2,2 0 0,0 12,6M16.6,16L15.53,14.92L14.45,16C13.15,17.29 10.87,17.3 9.56,16L8.5,14.92L7.4,16C6.75,16.64 5.88,17 4.96,17C4.23,17 3.56,16.77 3,16.39V21A1,1 0 0,0 4,22H20A1,1 0 0,0 21,21V16.39C20.44,16.77 19.77,17 19.04,17C18.12,17 17.25,16.64 16.6,16M18,9H13V7H11V9H6A3,3 0 0,0 3,12V13.54C3,14.62 3.88,15.5 4.96,15.5C5.5,15.5 6,15.3 6.34,14.93L8.5,12.8L10.61,14.93C11.35,15.67 12.64,15.67 13.38,14.93L15.5,12.8L17.65,14.93C18,15.3 18.5,15.5 19.03,15.5C20.11,15.5 21,14.62 21,13.54V12A3,3 0 0,0 18,9Z';
+ICONS['camera'] = 'M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z';
+ICONS['image'] = 'M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19Z';
+ICONS['video'] = 'M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z';
+ICONS['lightbulb'] = 'M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z';
+ICONS['fire'] = 'M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C5.78 10 4.87 12.3 5 14.47C5.06 14.97 5.12 15.47 5.29 15.97C5.43 16.57 5.7 17.17 6 17.7C7.08 19.43 8.95 20.67 10.96 20.92C13.1 21.19 15.39 20.8 17.03 19.32C18.86 17.66 19.5 15 18.56 12.72L18.43 12.46C18.22 12 17.66 11.2 17.66 11.2M14.5 17.5C14.22 17.74 13.76 18 13.4 18.1C12.28 18.5 11.16 17.94 10.5 17.28C11.69 17 12.4 16.12 12.61 15.23C12.78 14.43 12.46 13.77 12.33 13C12.21 12.26 12.23 11.63 12.5 10.94C12.69 11.32 12.89 11.7 13.13 12C13.9 13 15.11 13.44 15.37 14.8C15.41 14.94 15.43 15.08 15.43 15.23C15.46 16.05 15.1 16.95 14.5 17.5H14.5Z';
+ICONS['lock'] = 'M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z';
+ICONS['shield'] = 'M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z';
+ICONS['globe'] = 'M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z';
+ICONS['send'] = 'M2,21L23,12L2,3V10L17,12L2,14V21Z';
+ICONS['share'] = 'M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z';
+ICONS['search'] = 'M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z';
+ICONS['bell'] = 'M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21';
+ICONS['download'] = 'M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z';
+ICONS['qrcode'] = 'M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z';
+ICONS['briefcase'] = 'M10,2H14A2,2 0 0,1 16,4V6H20A2,2 0 0,1 22,8V19A2,2 0 0,1 20,21H4C2.89,21 2,20.1 2,19V8C2,6.89 2.89,6 4,6H8V4C8,2.89 8.89,2 10,2M14,6V4H10V6H14Z';
+ICONS['tools'] = 'M21.71 20.29L20.29 21.71A1 1 0 0 1 18.88 21.71L7 9.85A3.81 3.81 0 0 1 6 10A4 4 0 0 1 2.22 4.7L4.76 7.24L5.29 6.71L6.71 5.29L7.24 4.76L4.7 2.22A4 4 0 0 1 10 6A3.81 3.81 0 0 1 9.85 7L21.71 18.88A1 1 0 0 1 21.71 20.29M2.29 18.88A1 1 0 0 0 2.29 20.29L3.71 21.71A1 1 0 0 0 5.12 21.71L10.59 16.25L7.76 13.42M20 2L16 4V6L13.83 8.17L15.83 10.17L18 8H20L22 4Z';
+ICONS['hammer'] = 'M2 19.63L13.43 8.2L12.72 7.5L14.14 6.07L12 3.89C13.2 2.7 15.09 2.7 16.27 3.89L19.87 7.5L18.45 8.91H21.29L22 9.62L18.45 13.21L17.74 12.5V9.62L16.27 11.04L15.56 10.33L4.13 21.76L2 19.63Z';
+ICONS['scissors'] = 'M19,3L13,9L15,11L22,4V3M12,12.5A0.5,0.5 0 0,1 11.5,12A0.5,0.5 0 0,1 12,11.5A0.5,0.5 0 0,1 12.5,12A0.5,0.5 0 0,1 12,12.5M6,20A2,2 0 0,1 4,18C4,16.89 4.9,16 6,16A2,2 0 0,1 8,18C8,19.11 7.1,20 6,20M6,8A2,2 0 0,1 4,6C4,4.89 4.9,4 6,4A2,2 0 0,1 8,6C8,7.11 7.1,8 6,8M9.64,7.64C9.87,7.14 10,6.59 10,6A4,4 0 0,0 6,2A4,4 0 0,0 2,6A4,4 0 0,0 6,10C6.59,10 7.14,9.87 7.64,9.64L10,12L7.64,14.36C7.14,14.13 6.59,14 6,14A4,4 0 0,0 2,18A4,4 0 0,0 6,22A4,4 0 0,0 10,18C10,17.41 9.87,16.86 9.64,16.36L12,14L19,21H22V20L9.64,7.64Z';
+ICONS['hanger'] = 'M12 4A3.5 3.5 0 0 0 8.5 7.5H10.5A1.5 1.5 0 0 1 12 6A1.5 1.5 0 0 1 13.5 7.5A1.5 1.5 0 0 1 12 9C11.45 9 11 9.45 11 10V11.75L2.4 18.2A1 1 0 0 0 3 20H21A1 1 0 0 0 21.6 18.2L13 11.75V10.85A3.5 3.5 0 0 0 15.5 7.5A3.5 3.5 0 0 0 12 4M12 13.5L18 18H6Z';
+ICONS['dumbbell'] = 'M20.57,14.86L22,13.43L20.57,12L17,15.57L8.43,7L12,3.43L10.57,2L9.14,3.43L7.71,2L5.57,4.14L4.14,2.71L2.71,4.14L4.14,5.57L2,7.71L3.43,9.14L2,10.57L3.43,12L7,8.43L15.57,17L12,20.57L13.43,22L14.86,20.57L16.29,22L18.43,19.86L19.86,21.29L21.29,19.86L19.86,18.43L22,16.29L20.57,14.86Z';
+ICONS['soccer'] = 'M16.93 17.12L16.13 15.76L17.59 11.39L19 10.92L20 11.67C20 11.7 20 11.75 20 11.81C20 11.88 20.03 11.94 20.03 12C20.03 13.97 19.37 15.71 18.06 17.21L16.93 17.12M9.75 15L8.38 10.97L12 8.43L15.62 10.97L14.25 15H9.75M12 20.03C11.12 20.03 10.29 19.89 9.5 19.61L8.81 18.1L9.47 17H14.58L15.19 18.1L14.5 19.61C13.71 19.89 12.88 20.03 12 20.03M5.94 17.21C5.41 16.59 4.95 15.76 4.56 14.75C4.17 13.73 3.97 12.81 3.97 12C3.97 11.94 4 11.88 4 11.81C4 11.75 4 11.7 4 11.67L5 10.92L6.41 11.39L7.87 15.76L7.07 17.12L5.94 17.21M11 5.29V6.69L7 9.46L5.66 9.04L5.24 7.68C5.68 7 6.33 6.32 7.19 5.66S8.87 4.57 9.65 4.35L11 5.29M14.35 4.35C15.13 4.57 15.95 5 16.81 5.66C17.67 6.32 18.32 7 18.76 7.68L18.34 9.04L17 9.47L13 6.7V5.29L14.35 4.35M4.93 4.93C3 6.89 2 9.25 2 12S3 17.11 4.93 19.07 9.25 22 12 22 17.11 21 19.07 19.07 22 14.75 22 12 21 6.89 19.07 4.93 14.75 2 12 2 6.89 3 4.93 4.93Z';
+ICONS['basketball'] = 'M2.34,14.63C2.94,14.41 3.56,14.3 4.22,14.3C5.56,14.3 6.73,14.72 7.73,15.56L4.59,18.7C3.53,17.5 2.78,16.13 2.34,14.63M15.56,9.8C17.53,11.27 19.66,11.63 21.94,10.88C21.97,11.09 22,11.47 22,12C22,13.03 21.75,14.18 21.28,15.45C20.81,16.71 20.23,17.73 19.55,18.5L13.22,12.19L15.56,9.8M8.77,16.64C9.83,18.17 10.05,19.84 9.42,21.66C8,21.25 6.73,20.61 5.67,19.73L8.77,16.64M12.19,13.22L18.5,19.55C16.33,21.45 13.78,22.25 10.88,21.94C11.09,21.28 11.2,20.56 11.2,19.78C11.2,19.16 11.06,18.43 10.78,17.6C10.5,16.77 10.17,16.09 9.8,15.56L12.19,13.22M8.81,14.5C7.88,13.67 6.8,13.15 5.58,12.91C4.36,12.68 3.19,12.75 2.06,13.13C2.03,12.91 2,12.53 2,12C2,10.97 2.25,9.82 2.72,8.55C3.19,7.29 3.77,6.27 4.45,5.5L11.11,12.19L8.81,14.5M15.56,7.73C14.22,6.08 13.91,4.28 14.63,2.34C15.25,2.5 15.96,2.8 16.76,3.26C17.55,3.71 18.2,4.16 18.7,4.59L15.56,7.73M21.66,9.38C21.06,9.59 20.44,9.7 19.78,9.7C18.69,9.7 17.64,9.38 16.64,8.72L19.73,5.67C20.61,6.77 21.25,8 21.66,9.38M12.19,11.11L5.5,4.45C7.67,2.55 10.22,1.75 13.13,2.06C12.91,2.72 12.8,3.44 12.8,4.22C12.8,4.94 12.96,5.75 13.29,6.66C13.62,7.56 14,8.28 14.5,8.81L12.19,11.11Z';
+ICONS['trophy'] = 'M18 2C17.1 2 16 3 16 4H8C8 3 6.9 2 6 2H2V11C2 12 3 13 4 13H6.2C6.6 15 7.9 16.7 11 17V19.08C8 19.54 8 22 8 22H16C16 22 16 19.54 13 19.08V17C16.1 16.7 17.4 15 17.8 13H20C21 13 22 12 22 11V2H18M6 11H4V4H6V11M20 11H18V4H20V11Z';
+ICONS['crown'] = 'M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z';
+ICONS['diamond'] = 'M6,2L2,8L12,22L22,8L18,2H6Z';
+ICONS['percent'] = 'M18.5,3.5L3.5,18.5L5.5,20.5L20.5,5.5M7,4A3,3 0 0,0 4,7A3,3 0 0,0 7,10A3,3 0 0,0 10,7A3,3 0 0,0 7,4M17,14A3,3 0 0,0 14,17A3,3 0 0,0 17,20A3,3 0 0,0 20,17A3,3 0 0,0 17,14Z';
+ICONS['sale'] = 'M18.65,2.85L19.26,6.71L22.77,8.5L21,12L22.78,15.5L19.24,17.29L18.63,21.15L14.74,20.54L11.97,23.3L9.19,20.5L5.33,21.14L4.71,17.25L1.22,15.47L3,11.97L1.23,8.5L4.74,6.69L5.35,2.86L9.22,3.5L12,0.69L14.77,3.46L18.65,2.85M9.5,7A1.5,1.5 0 0,0 8,8.5A1.5,1.5 0 0,0 9.5,10A1.5,1.5 0 0,0 11,8.5A1.5,1.5 0 0,0 9.5,7M14.5,14A1.5,1.5 0 0,0 13,15.5A1.5,1.5 0 0,0 14.5,17A1.5,1.5 0 0,0 16,15.5A1.5,1.5 0 0,0 14.5,14M8.41,17L17,8.41L15.59,7L7,15.59L8.41,17Z';
+ICONS['tag'] = 'M5.5,7A1.5,1.5 0 0,1 4,5.5A1.5,1.5 0 0,1 5.5,4A1.5,1.5 0 0,1 7,5.5A1.5,1.5 0 0,1 5.5,7M21.41,11.58L12.41,2.58C12.05,2.22 11.55,2 11,2H4C2.89,2 2,2.89 2,4V11C2,11.55 2.22,12.05 2.59,12.41L11.58,21.41C11.95,21.77 12.45,22 13,22C13.55,22 14.05,21.77 14.41,21.41L21.41,14.41C21.78,14.05 22,13.55 22,13C22,12.44 21.77,11.94 21.41,11.58Z';
+ICONS['truck'] = 'M18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5M19.5,9.5L21.46,12H17V9.5M6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5M20,8H17V4H3C1.89,4 1,4.89 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8Z';
+ICONS['package'] = 'M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L10.11,5.22L16,8.61L17.96,7.5L12,4.15M6.04,7.5L12,10.85L13.96,9.75L8.08,6.35L6.04,7.5M5,15.91L11,19.29V12.58L5,9.21V15.91M19,15.91V9.21L13,12.58V19.29L19,15.91Z';
+ICONS['leaf'] = 'M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z';
+ICONS['sun'] = 'M3.55 19.09L4.96 20.5L6.76 18.71L5.34 17.29M12 6C8.69 6 6 8.69 6 12S8.69 18 12 18 18 15.31 18 12C18 8.68 15.31 6 12 6M20 13H23V11H20M17.24 18.71L19.04 20.5L20.45 19.09L18.66 17.29M20.45 5L19.04 3.6L17.24 5.39L18.66 6.81M13 1H11V4H13M6.76 5.39L4.96 3.6L3.55 5L5.34 6.81L6.76 5.39M1 13H4V11H1M13 20H11V23H13';
+ICONS['moon'] = 'M17.75,4.09L15.22,6.03L16.13,9.09L13.5,7.28L10.87,9.09L11.78,6.03L9.25,4.09L12.44,4L13.5,1L14.56,4L17.75,4.09M21.25,11L19.61,12.25L20.2,14.23L18.5,13.06L16.8,14.23L17.39,12.25L15.75,11L17.81,10.95L18.5,9L19.19,10.95L21.25,11M18.97,15.95C19.8,15.87 20.69,17.05 20.16,17.8C19.84,18.25 19.5,18.67 19.08,19.07C15.17,23 8.84,23 4.94,19.07C1.03,15.17 1.03,8.83 4.94,4.93C5.34,4.53 5.76,4.17 6.21,3.85C6.96,3.32 8.14,4.21 8.06,5.04C7.79,7.9 8.75,10.87 10.95,13.06C13.14,15.26 16.1,16.22 18.97,15.95M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.64 6.35,17.66C9.37,20.67 14.19,20.78 17.33,17.97Z';
+ICONS['flower'] = 'M3,13A9,9 0 0,0 12,22C12,17 7.97,13 3,13M12,5.5A2.5,2.5 0 0,1 14.5,8A2.5,2.5 0 0,1 12,10.5A2.5,2.5 0 0,1 9.5,8A2.5,2.5 0 0,1 12,5.5M5.6,10.25A2.5,2.5 0 0,0 8.1,12.75C8.63,12.75 9.12,12.58 9.5,12.31C9.5,12.37 9.5,12.43 9.5,12.5A2.5,2.5 0 0,0 12,15A2.5,2.5 0 0,0 14.5,12.5C14.5,12.43 14.5,12.37 14.5,12.31C14.88,12.58 15.37,12.75 15.9,12.75C17.28,12.75 18.4,11.63 18.4,10.25C18.4,9.25 17.81,8.4 16.97,8C17.81,7.6 18.4,6.74 18.4,5.75C18.4,4.37 17.28,3.25 15.9,3.25C15.37,3.25 14.88,3.41 14.5,3.69C14.5,3.63 14.5,3.56 14.5,3.5A2.5,2.5 0 0,0 12,1A2.5,2.5 0 0,0 9.5,3.5C9.5,3.56 9.5,3.63 9.5,3.69C9.12,3.41 8.63,3.25 8.1,3.25A2.5,2.5 0 0,0 5.6,5.75C5.6,6.74 6.19,7.6 7.03,8C6.19,8.4 5.6,9.25 5.6,10.25M12,22A9,9 0 0,0 21,13C16,13 12,17 12,22Z';
+ICONS['paw'] = 'M8.35,3C9.53,2.83 10.78,4.12 11.14,5.9C11.5,7.67 10.85,9.25 9.67,9.43C8.5,9.61 7.24,8.32 6.87,6.54C6.5,4.77 7.17,3.19 8.35,3M15.5,3C16.69,3.19 17.35,4.77 17,6.54C16.62,8.32 15.37,9.61 14.19,9.43C13,9.25 12.35,7.67 12.72,5.9C13.08,4.12 14.33,2.83 15.5,3M3,7.6C4.14,7.11 5.69,8 6.5,9.55C7.26,11.13 7,12.79 5.87,13.28C4.74,13.77 3.2,12.89 2.41,11.32C1.62,9.75 1.9,8.08 3,7.6M21,7.6C22.1,8.08 22.38,9.75 21.59,11.32C20.8,12.89 19.26,13.77 18.13,13.28C17,12.79 16.74,11.13 17.5,9.55C18.31,8 19.86,7.11 21,7.6M19.33,18.38C19.37,19.32 18.65,20.36 17.79,20.75C16,21.57 13.88,19.87 11.89,19.87C9.9,19.87 7.76,21.64 6,20.75C5,20.26 4.31,18.96 4.44,17.88C4.62,16.39 6.41,15.59 7.47,14.5C8.88,13.09 9.88,10.44 11.89,10.44C13.89,10.44 14.95,13.05 16.3,14.5C17.41,15.72 19.26,16.75 19.33,18.38Z';
+ICONS['handshake'] = 'M11 6H14L17.29 2.7A1 1 0 0 1 18.71 2.7L21.29 5.29A1 1 0 0 1 21.29 6.7L19 9H11V11A1 1 0 0 1 10 12A1 1 0 0 1 9 11V8A2 2 0 0 1 11 6M5 11V15L2.71 17.29A1 1 0 0 0 2.71 18.7L5.29 21.29A1 1 0 0 0 6.71 21.29L11 17H15A1 1 0 0 0 16 16V15H17A1 1 0 0 0 18 14V13H19A1 1 0 0 0 20 12V11H13V12A2 2 0 0 1 11 14H9A2 2 0 0 1 7 12V9Z';
+ICONS['thumb_up'] = 'M23,10C23,8.89 22.1,8 21,8H14.68L15.64,3.43C15.66,3.33 15.67,3.22 15.67,3.11C15.67,2.7 15.5,2.32 15.23,2.05L14.17,1L7.59,7.58C7.22,7.95 7,8.45 7,9V19A2,2 0 0,0 9,21H18C18.83,21 19.54,20.5 19.84,19.78L22.86,12.73C22.95,12.5 23,12.26 23,12V10M1,21H5V9H1V21Z';
+ICONS['chat'] = 'M12,3C17.5,3 22,6.58 22,11C22,15.42 17.5,19 12,19C10.76,19 9.57,18.82 8.47,18.5C5.55,21 2,21 2,21C4.33,18.67 4.7,17.1 4.75,16.5C3.05,15.07 2,13.13 2,11C2,6.58 6.5,3 12,3Z';
+ICONS['comment'] = 'M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9M5,5V7H19V5H5M5,9V11H13V9H5M5,13V15H15V13H5Z';
+ICONS['quote'] = 'M10,7L8,11H11V17H5V11L7,7H10M18,7L16,11H19V17H13V11L15,7H18Z';
+ICONS['parking'] = 'M13.2,11H10V7H13.2A2,2 0 0,1 15.2,9A2,2 0 0,1 13.2,11M13,3H6V21H10V15H13A6,6 0 0,0 19,9C19,5.68 16.31,3 13,3Z';
+ICONS['wheelchair'] = 'M18.4,11.2L14.3,11.4L16.6,8.8C16.8,8.5 16.9,8 16.8,7.5C16.7,7.2 16.6,6.9 16.3,6.7L10.9,3.5C10.5,3.2 9.9,3.3 9.5,3.6L6.8,6.1C6.3,6.6 6.2,7.3 6.7,7.8C7.1,8.3 7.9,8.3 8.4,7.9L10.4,6.1L12.3,7.2L8.1,11.5C8,11.6 8,11.7 7.9,11.7C7.4,11.9 6.9,12.1 6.5,12.4L8,13.9C8.5,13.7 9,13.5 9.5,13.5C11.4,13.5 13,15.1 13,17C13,17.6 12.9,18.1 12.6,18.5L14.1,20C14.7,19.1 15,18.1 15,17C15,15.8 14.6,14.6 13.9,13.7L17.2,13.4L17,18.2C16.9,18.9 17.4,19.4 18.1,19.5H18.2C18.8,19.5 19.3,19 19.4,18.4L19.6,12.5C19.6,12.2 19.5,11.8 19.3,11.6C19,11.3 18.7,11.2 18.4,11.2M18,5.5A2,2 0 0,0 20,3.5A2,2 0 0,0 18,1.5A2,2 0 0,0 16,3.5A2,2 0 0,0 18,5.5M12.5,21.6C11.6,22.2 10.6,22.5 9.5,22.5C6.5,22.5 4,20 4,17C4,15.9 4.3,14.9 4.9,14L6.4,15.5C6.2,16 6,16.5 6,17C6,18.9 7.6,20.5 9.5,20.5C10.1,20.5 10.6,20.4 11,20.1L12.5,21.6Z';
+ICONS['sparkles'] = 'M19,1L17.74,3.75L15,5L17.74,6.26L19,9L20.25,6.26L23,5L20.25,3.75M9,4L6.5,9.5L1,12L6.5,14.5L9,20L11.5,14.5L17,12L11.5,9.5M19,15L17.74,17.74L15,19L17.74,20.25L19,23L20.25,20.25L23,19L20.25,17.74';
+ICONS['spa'] = 'M15.5,9.63C15.31,6.84 14.18,4.12 12.06,2C9.92,4.14 8.74,6.86 8.5,9.63C9.79,10.31 10.97,11.19 12,12.26C13.03,11.2 14.21,10.32 15.5,9.63M12,15.45C9.85,12.17 6.18,10 2,10C2,20 11.32,21.89 12,22C12.68,21.88 22,20 22,10C17.82,10 14.15,12.17 12,15.45Z';
+ICONS['bed'] = 'M19,7H11V14H3V5H1V20H3V17H21V20H23V11A4,4 0 0,0 19,7M7,13A3,3 0 0,0 10,10A3,3 0 0,0 7,7A3,3 0 0,0 4,10A3,3 0 0,0 7,13Z';
+ICONS['home_city'] = 'M0,21V10L7.5,5L15,10V21H10V14H5V21H0M24,2V21H17V8.93L16,8.27V6H14V6.93L10,4.27V2H24M21,14H19V16H21V14M21,10H19V12H21V10M21,6H19V8H21V6Z';
+ICONS['building'] = 'M5,3V21H11V17.5H13V21H19V3H5M7,5H9V7H7V5M11,5H13V7H11V5M15,5H17V7H15V5M7,9H9V11H7V9M11,9H13V11H11V9M15,9H17V11H15V9M7,13H9V15H7V13M11,13H13V15H11V13M15,13H17V15H15V13M7,17H9V19H7V17M15,17H17V19H15V17Z';
+ICONS['key'] = 'M7 14C5.9 14 5 13.1 5 12S5.9 10 7 10 9 10.9 9 12 8.1 14 7 14M12.6 10C11.8 7.7 9.6 6 7 6C3.7 6 1 8.7 1 12S3.7 18 7 18C9.6 18 11.8 16.3 12.6 14H16V18H20V14H23V10H12.6Z';
+ICONS['laptop'] = 'M4,6H20V16H4M20,18A2,2 0 0,0 22,16V6C22,4.89 21.1,4 20,4H4C2.89,4 2,4.89 2,6V16A2,2 0 0,0 4,18H0V20H24V18H20Z';
+ICONS['cellphone_message'] = 'M11,17V7H4V17H11M11,3A2,2 0 0,1 13,5V19A2,2 0 0,1 11,21H4C2.89,21 2,20.1 2,19V5A2,2 0 0,1 4,3H11M16.5,3H21.5A1.5,1.5 0 0,1 23,4.5V7.5A1.5,1.5 0 0,1 21.5,9H18L15,12V9L15,4.5A1.5,1.5 0 0,1 16.5,3Z';
+ICONS['account_tie'] = 'M12 3C14.21 3 16 4.79 16 7S14.21 11 12 11 8 9.21 8 7 9.79 3 12 3M16 13.54C16 14.6 15.72 17.07 13.81 19.83L13 15L13.94 13.12C13.32 13.05 12.67 13 12 13S10.68 13.05 10.06 13.12L11 15L10.19 19.83C8.28 17.07 8 14.6 8 13.54C5.61 14.24 4 15.5 4 17V21H20V17C20 15.5 18.4 14.24 16 13.54Z';
+ICONS['microphone_variant'] = 'M9,3A4,4 0 0,1 13,7H5A4,4 0 0,1 9,3M11.84,9.82L11,18H10V19A2,2 0 0,0 12,21A2,2 0 0,0 14,19V14A4,4 0 0,1 18,10H20L19,11L20,12H18A2,2 0 0,0 16,14V19A4,4 0 0,1 12,23A4,4 0 0,1 8,19V18H7L6.16,9.82C5.67,9.32 5.31,8.7 5.13,8H12.87C12.69,8.7 12.33,9.32 11.84,9.82M9,11A1,1 0 0,0 8,12A1,1 0 0,0 9,13A1,1 0 0,0 10,12A1,1 0 0,0 9,11Z';
+ICONS['guitar'] = 'M19.59,3H22V5H20.41L16.17,9.24C15.8,8.68 15.32,8.2 14.76,7.83L19.59,3M12,8A4,4 0 0,1 16,12C16,13.82 14.77,15.42 13,15.87V16A5,5 0 0,1 8,21A5,5 0 0,1 3,16A5,5 0 0,1 8,11H8.13C8.58,9.24 10.17,8 12,8M12,10.5A1.5,1.5 0 0,0 10.5,12A1.5,1.5 0 0,0 12,13.5A1.5,1.5 0 0,0 13.5,12A1.5,1.5 0 0,0 12,10.5M6.94,14.24L6.23,14.94L9.06,17.77L9.77,17.06L6.94,14.24Z';
+ICONS['headphones'] = 'M12,1C7,1 3,5 3,10V17A3,3 0 0,0 6,20H9V12H5V10A7,7 0 0,1 12,3A7,7 0 0,1 19,10V12H15V20H18A3,3 0 0,0 21,17V10C21,5 16.97,1 12,1Z';
+ICONS['dance'] = 'M17 17H15V23H13V17H10.88L9.34 18.93L11.71 21.29L10.29 22.71L7.93 20.34C7.58 20 7.38 19.53 7.35 19.04C7.32 18.55 7.47 18.06 7.78 17.68L8.32 17H7L9 13V10C8.38 10.47 7.88 11.07 7.53 11.76C7.18 12.46 7 13.22 7 14H5C5 12.14 5.74 10.36 7.05 9.05C8.36 7.74 10.14 7 12 7C13.33 7 14.6 6.47 15.54 5.54C16.47 4.6 17 3.33 17 2H19C19 3.32 18.62 4.62 17.91 5.73C17.2 6.85 16.2 7.74 15 8.31V13L17 17M14 4C14 4.4 13.88 4.78 13.66 5.11C13.44 5.44 13.13 5.7 12.77 5.85C12.4 6 12 6.04 11.61 5.96C11.22 5.88 10.87 5.69 10.59 5.41C10.31 5.13 10.12 4.78 10.04 4.39C9.96 4 10 3.6 10.15 3.24C10.3 2.87 10.56 2.56 10.89 2.34C11.22 2.12 11.6 2 12 2C12.53 2 13.04 2.21 13.41 2.59C13.79 2.96 14 3.47 14 4Z';
+ICONS['calendar_check'] = 'M19,19H5V8H19M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M16.53,11.06L15.47,10L10.59,14.88L8.47,12.76L7.41,13.82L10.59,17L16.53,11.06Z';
+ICONS['map'] = 'M15,19L9,16.89V5L15,7.11M20.5,3C20.44,3 20.39,3 20.34,3L15,5.1L9,3L3.36,4.9C3.15,4.97 3,5.15 3,5.38V20.5A0.5,0.5 0 0,0 3.5,21C3.55,21 3.61,21 3.66,20.97L9,18.9L15,21L20.64,19.1C20.85,19 21,18.85 21,18.62V3.5A0.5,0.5 0 0,0 20.5,3Z';
+ICONS['navigation'] = 'M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z';
+ICONS['whatsapp_mdi'] = 'M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M8.53 7.33C8.37 7.33 8.1 7.39 7.87 7.64C7.65 7.89 7 8.5 7 9.71C7 10.93 7.89 12.1 8 12.27C8.14 12.44 9.76 14.94 12.25 16C12.84 16.27 13.3 16.42 13.66 16.53C14.25 16.72 14.79 16.69 15.22 16.63C15.7 16.56 16.68 16.03 16.89 15.45C17.1 14.87 17.1 14.38 17.04 14.27C16.97 14.17 16.81 14.11 16.56 14C16.31 13.86 15.09 13.26 14.87 13.18C14.64 13.1 14.5 13.06 14.31 13.3C14.15 13.55 13.67 14.11 13.53 14.27C13.38 14.44 13.24 14.46 13 14.34C12.74 14.21 11.94 13.95 11 13.11C10.26 12.45 9.77 11.64 9.62 11.39C9.5 11.15 9.61 11 9.73 10.89C9.84 10.78 10 10.6 10.1 10.45C10.23 10.31 10.27 10.2 10.35 10.04C10.43 9.87 10.39 9.73 10.33 9.61C10.27 9.5 9.77 8.26 9.56 7.77C9.36 7.29 9.16 7.35 9 7.34C8.86 7.34 8.7 7.33 8.53 7.33Z';
+//@@LIB_END
 
 ================================================================================
  FIN DES INSTRUCTIONS — exécute maintenant la mission sur l'image fournie.
