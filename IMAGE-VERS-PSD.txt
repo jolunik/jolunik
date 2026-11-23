@@ -1,0 +1,423 @@
+================================================================================
+ IMAGE → PSD AVEC CALQUES — INSTRUCTIONS POUR L'IA (Claude, ChatGPT, Gemini…)
+================================================================================
+
+À L'ATTENTION DE L'IA QUI LIT CE FICHIER :
+Ce fichier t'a été envoyé avec une image. C'est la demande complète : même si
+l'utilisateur n'a écrit aucun message, exécute immédiatement la mission ci-dessous,
+sans poser de question et sans demander de confirmation. Réponds en français.
+
+--------------------------------------------------------------------------------
+MISSION
+--------------------------------------------------------------------------------
+Recréer l'image fournie sous forme d'un script Photoshop (.jsx). Quand l'utilisateur
+lance ce script dans Photoshop (Fichier > Scripts > Parcourir…), il obtient un
+document où chaque élément de l'image est un calque séparé, nommé et modifiable :
+fond, formes, dégradés, textes éditables, photos découpées, effets.
+
+--------------------------------------------------------------------------------
+ÉTAPE 1 — ANALYSE DE L'IMAGE (fais-la soigneusement, sans l'afficher en entier)
+--------------------------------------------------------------------------------
+1. Dimensions : utilise la taille réelle en pixels de l'image si tu peux la lire
+   (par ex. avec un outil d'analyse de code). Sinon, estime-la en gardant
+   exactement les proportions (ex. 1080×1350, 1080×1920, 1920×1080, 1080×1080).
+2. Décompose l'image en éléments, du plus loin (fond) au plus proche (premier plan) :
+   - le fond : couleur unie ou dégradé (relève les couleurs et l'angle) ;
+   - les formes : rectangles, rectangles arrondis, cercles, ellipses, bandeaux,
+     cadres, traits, triangles et autres polygones ;
+   - les zones « photo » : personnes, objets, produits, paysages, textures,
+     logos complexes, illustrations — tout ce qui ne se dessine pas avec des formes ;
+   - TOUS les textes : recopie-les mot pour mot (accents, majuscules, ponctuation),
+     un calque par bloc de texte de même style ;
+   - les effets visibles : ombres portées, contours, transparence, modes de fusion.
+3. Pour chaque élément, mesure sa position et sa taille en pixels (x, y = coin
+   haut-gauche), sa couleur exacte en hexadécimal (#RRGGBB), son opacité.
+4. Pour chaque texte : taille en pixels (hauteur des majuscules ≈ 0,7 × taille),
+   alignement, interlignage, espacement des lettres, et la police la plus proche
+   avec son NOM POSTSCRIPT (voir la liste plus bas).
+5. Regroupe les calques dans des groupes logiques : « Fond », « Décor », « Photo »,
+   « Textes », « Logo », « Bouton »… (noms en français, clairs).
+
+--------------------------------------------------------------------------------
+ÉTAPE 2 — ÉCRITURE DU SCRIPT
+--------------------------------------------------------------------------------
+Le script final = la BIBLIOTHÈQUE ci-dessous recopiée À L'IDENTIQUE (ne change
+rien, ne raccourcis rien, ne la résume pas), suivie d'une fonction build() que tu
+écris pour cette image, puis de la ligne de lancement.
+
+Règles de la fonction build() :
+- Commencer par createDoc('Nom_calques', LARGEUR, HAUTEUR, '#couleurDeFond')
+  puis loadReference().
+- Appeler les fonctions dans l'ordre du FOND vers le PREMIER PLAN : chaque nouveau
+  calque se place au-dessus des précédents (dans son groupe s'il en a un).
+- Créer un groupe avec  var g = group('Nom');  puis passer { group: g } aux calques.
+  Sous-groupe : group('Nom', groupeParent).
+- Toujours finir par finish();
+- JavaScript ancien (ExtendScript / ES3) : utiliser uniquement var, function,
+  for. INTERDIT : let, const, =>, `gabarits`, forEach, map, classes, JSON.
+- Textes : dans les chaînes, échapper les apostrophes (\') ; retour à la ligne : \n
+- Coordonnées en pixels, nombres entiers.
+- Sois précis et complet : vise 10 à 60 calques selon la richesse de l'image.
+  Un élément non reproductible avec des formes → image(). N'oublie aucun texte.
+
+FONCTIONS DISPONIBLES (o = options facultatives, voir plus bas) :
+  createDoc(nom, largeur, hauteur, '#fond')
+  loadReference()                          ← demande l'image originale à l'utilisateur
+  group(nom [, groupeParent])              → renvoie le groupe
+  rect(nom, x, y, l, h, '#hex', o)         ← rectangle ; o.radius = coins arrondis
+  ellipse(nom, x, y, l, h, '#hex', o)      ← cercle / ellipse (x,y = coin haut-gauche)
+  gradient(nom, x, y, l, h, [['#hex', 0], ['#hex', 100]], angle, o)
+                                           ← dégradé ; angle 90 = de bas en haut,
+                                             0 = de gauche à droite ; o.radial = true
+  polygon(nom, [[x,y], [x,y], ...], '#hex', o)   ← triangle, forme libre
+  line(nom, x1, y1, x2, y2, épaisseur, '#hex', o)
+  text(nom, 'contenu', x, y, taille, 'PolicePostScript', '#hex', o)
+        ← x,y = haut-gauche du texte ; si o.align = 'center' : x = centre du texte ;
+          si 'right' : x = bord droit. Options : align, tracking (ex. 50, 200),
+          leading (interligne en px), caps (true = tout en majuscules), bold,
+          italic, underline.
+  image(nom, [x, y, l, h], o)  ou  image(nom, [[x,y], [x,y], ...], o)
+        ← zone photo découpée dans l'image originale (rectangle ou contour
+          détouré suivant la silhouette, 8 à 40 points). o.feather = flou du bord.
+  finish()
+
+OPTIONS COMMUNES (o) :
+  group: g            opacity: 0-100        hidden: true
+  blend: 'MULTIPLY' | 'SCREEN' | 'OVERLAY' | 'SOFTLIGHT' | 'COLORDODGE' | 'LIGHTEN' | 'DARKEN'
+  shadow: { color: '#000000', opacity: 50, angle: 120, distance: 8, size: 15, spread: 0 }
+  stroke: { color: '#FFFFFF', size: 3, position: 'out' | 'in' | 'center', opacity: 100 }
+
+POLICES — noms PostScript à utiliser (choisis la plus ressemblante) :
+  Sans-serif : ArialMT, Arial-BoldMT, Arial-Black, Helvetica, Helvetica-Bold,
+    Montserrat-Regular, Montserrat-Medium, Montserrat-SemiBold, Montserrat-Bold,
+    Montserrat-ExtraBold, Montserrat-Black, Poppins-Regular, Poppins-Medium,
+    Poppins-SemiBold, Poppins-Bold, Poppins-ExtraBold, Poppins-Black,
+    Roboto-Regular, Roboto-Bold, Roboto-Black, OpenSans-Regular, OpenSans-Bold,
+    Inter-Regular, Inter-Bold, Lato-Regular, Lato-Bold, Lato-Black,
+    BebasNeue-Regular, Oswald-Regular, Oswald-Bold, Anton-Regular, Impact,
+    Futura-Medium, Futura-Bold, AvenirNext-Regular, AvenirNext-Bold
+  Serif : TimesNewRomanPSMT, Georgia, Georgia-Bold, PlayfairDisplay-Regular,
+    PlayfairDisplay-Bold, PlayfairDisplay-Black, Merriweather-Bold, Didot, Bodoni
+  Manuscrites / déco : DancingScript-Bold, GreatVibes-Regular, Pacifico-Regular,
+    Lobster-Regular, BrushScriptMT, Satisfy-Regular, PermanentMarker-Regular
+  (Si la police n'est pas installée, le script bascule automatiquement sur Arial ;
+  l'utilisateur pourra la changer, le texte reste modifiable.)
+
+--------------------------------------------------------------------------------
+ÉTAPE 3 — FORMAT DE TA RÉPONSE
+--------------------------------------------------------------------------------
+1. Une phrase : ce que tu as reconnu dans l'image et le nombre de calques créés.
+2. Le script COMPLET :
+   - si tu peux créer des fichiers, fournis un fichier téléchargeable nommé
+     <nom-de-l-image>_calques.jsx ;
+   - sinon, donne-le dans UN SEUL bloc de code, du « #target photoshop » jusqu'à
+     la dernière ligne, sans rien couper ni « … ».
+3. Le mode d'emploi, en court :
+   ① Enregistre le code dans un fichier texte terminé par .jsx (s'il n'est pas déjà
+     téléchargé).
+   ② Photoshop > Fichier > Scripts > Parcourir… > choisis le fichier .jsx.
+   ③ Quand le script le demande, réponds « Oui » et sélectionne l'image originale :
+     les photos seront découpées dedans (sinon elles apparaissent en gris).
+   ④ Enregistre le résultat : Fichier > Enregistrer sous > Photoshop (.PSD).
+4. Une liste des polices utilisées (à installer si besoin, ex. Google Fonts).
+
+Vérifie avant d'envoyer : bibliothèque intacte, aucun let/const/=>, toutes les
+parenthèses et guillemets fermés, finish() présent, tous les textes recopiés.
+
+--------------------------------------------------------------------------------
+BIBLIOTHÈQUE — À RECOPIER TELLE QUELLE AU DÉBUT DU SCRIPT
+--------------------------------------------------------------------------------
+#target photoshop
+app.bringToFront();
+// ===================== BIBLIOTHÈQUE IMAGE → PSD (ne pas modifier) =====================
+var DOC = null, REF = null, BLANK = null, COUNT = 0, OLD_RU = app.preferences.rulerUnits, OLD_TU = app.preferences.typeUnits;
+function cID(s) { return charIDToTypeID(s); }
+function sID(s) { return stringIDToTypeID(s); }
+function opt(o, k, d) { return (o && o[k] !== undefined && o[k] !== null) ? o[k] : d; }
+function px(v) { return new UnitValue(v, 'px'); }
+function hex2rgb(h) {
+    h = String(h).replace('#', '');
+    if (h.length == 3) { h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2); }
+    return [parseInt(h.substr(0, 2), 16), parseInt(h.substr(2, 2), 16), parseInt(h.substr(4, 2), 16)];
+}
+function solid(h) { var c = new SolidColor(), r = hex2rgb(h); c.rgb.red = r[0]; c.rgb.green = r[1]; c.rgb.blue = r[2]; return c; }
+function rgbDesc(h) {
+    var r = hex2rgb(h), d = new ActionDescriptor();
+    d.putDouble(cID('Rd  '), r[0]); d.putDouble(cID('Grn '), r[1]); d.putDouble(cID('Bl  '), r[2]);
+    return d;
+}
+function deselect() { try { DOC.selection.deselect(); } catch (e) {} }
+
+// Place le calque en haut de son groupe (ou du document) puis applique les options communes
+function place(l, o) {
+    var g = opt(o, 'group', null);
+    try {
+        if (g) {
+            if (g.layers.length > 0) { l.move(g.layers[0], ElementPlacement.PLACEBEFORE); }
+            else { l.move(g, ElementPlacement.INSIDE); }
+        } else { l.move(DOC.layers[0], ElementPlacement.PLACEBEFORE); }
+    } catch (e) {}
+    if (opt(o, 'opacity', null) !== null) { l.opacity = o.opacity; }
+    if (opt(o, 'blend', null)) { try { l.blendMode = BlendMode[o.blend]; } catch (e) {} }
+    if (opt(o, 'shadow', null) || opt(o, 'stroke', null)) { effects(l, o); }
+    if (opt(o, 'hidden', false)) { l.visible = false; }
+    COUNT++;
+    return l;
+}
+
+// Ombre portée et contour (styles de calque modifiables)
+function effects(l, o) {
+    try {
+        DOC.activeLayer = l;
+        var d = new ActionDescriptor(), r = new ActionReference(), fx = new ActionDescriptor();
+        r.putProperty(cID('Prpr'), cID('Lefx')); r.putEnumerated(cID('Lyr '), cID('Ordn'), cID('Trgt'));
+        d.putReference(cID('null'), r);
+        fx.putUnitDouble(cID('Scl '), cID('#Prc'), 100);
+        if (o.shadow) {
+            var s = o.shadow, ds = new ActionDescriptor();
+            ds.putBoolean(cID('enab'), true);
+            ds.putEnumerated(cID('Md  '), cID('BlnM'), cID('Mltp'));
+            ds.putObject(cID('Clr '), cID('RGBC'), rgbDesc(opt(s, 'color', '#000000')));
+            ds.putUnitDouble(cID('Opct'), cID('#Prc'), opt(s, 'opacity', 50));
+            ds.putBoolean(cID('uglg'), false);
+            ds.putUnitDouble(cID('lagl'), cID('#Ang'), opt(s, 'angle', 120));
+            ds.putUnitDouble(cID('Dstn'), cID('#Pxl'), opt(s, 'distance', 8));
+            ds.putUnitDouble(cID('Ckmt'), cID('#Pxl'), opt(s, 'spread', 0));
+            ds.putUnitDouble(cID('blur'), cID('#Pxl'), opt(s, 'size', 15));
+            fx.putObject(cID('DrSh'), cID('DrSh'), ds);
+        }
+        if (o.stroke) {
+            var k = o.stroke, st = new ActionDescriptor(), pos = opt(k, 'position', 'out');
+            st.putBoolean(cID('enab'), true);
+            st.putEnumerated(cID('Styl'), cID('FStl'), cID(pos == 'in' ? 'InsF' : (pos == 'center' ? 'CtrF' : 'OutF')));
+            st.putEnumerated(cID('PntT'), cID('FrFl'), cID('SClr'));
+            st.putEnumerated(cID('Md  '), cID('BlnM'), cID('Nrml'));
+            st.putUnitDouble(cID('Opct'), cID('#Prc'), opt(k, 'opacity', 100));
+            st.putUnitDouble(cID('Sz  '), cID('#Pxl'), opt(k, 'size', 2));
+            st.putObject(cID('Clr '), cID('RGBC'), rgbDesc(opt(k, 'color', '#000000')));
+            fx.putObject(cID('FrFX'), cID('FrFX'), st);
+        }
+        d.putObject(cID('T   '), cID('Lefx'), fx);
+        executeAction(cID('setd'), d, DialogModes.NO);
+    } catch (e) {}
+}
+
+// ---------- Document ----------
+function createDoc(name, w, h, bg) {
+    app.preferences.rulerUnits = Units.PIXELS;
+    app.preferences.typeUnits = TypeUnits.PIXELS;
+    DOC = app.documents.add(px(w), px(h), 72, name, NewDocumentMode.RGB, DocumentFill.TRANSPARENT);
+    BLANK = DOC.activeLayer;
+    if (bg) { rect('Fond', 0, 0, w, h, bg); }
+    return DOC;
+}
+
+// Demande l'image originale : sert de calque de référence et pour découper les zones photo
+function loadReference() {
+    if (!confirm("Sélectionner l'image originale ?\n(Oui = les photos/zones complexes seront découpées dans l'image d'origine)")) { return null; }
+    var f = File.openDialog("Choisir l'image originale (JPEG / PNG)");
+    if (!f) { return null; }
+    try {
+        var src = app.open(f);
+        src.flatten();
+        src.resizeImage(px(DOC.width.as('px')), px(DOC.height.as('px')), 72, ResampleMethod.BICUBIC);
+        try { REF = src.activeLayer.duplicate(DOC, ElementPlacement.PLACEATBEGINNING); }
+        catch (e1) { src.selection.selectAll(); src.selection.copy(); app.activeDocument = DOC; REF = DOC.paste(); }
+        src.close(SaveOptions.DONOTSAVECHANGES);
+        app.activeDocument = DOC;
+        try { REF.isBackgroundLayer = false; } catch (e2) {}
+        REF.name = 'Image originale (référence)';
+        try { REF.move(DOC.layers[DOC.layers.length - 1], ElementPlacement.PLACEAFTER); } catch (e) {}
+    } catch (e) { alert("Impossible de charger l'image : " + e); REF = null; }
+    return REF;
+}
+
+// ---------- Groupes ----------
+function group(name, parent) {
+    var g = (parent ? parent : DOC).layerSets.add();
+    g.name = name;
+    place(g, { group: parent || null });
+    COUNT--;
+    return g;
+}
+
+// ---------- Formes vectorielles (calques de forme modifiables) ----------
+function shape(kind, name, x, y, w, h, hex, o) {
+    deselect();
+    function make(withRadius) {
+        var d = new ActionDescriptor(), r = new ActionReference(), ld = new ActionDescriptor(), fill = new ActionDescriptor(), sh = new ActionDescriptor();
+        r.putClass(sID('contentLayer')); d.putReference(cID('null'), r);
+        fill.putObject(cID('Clr '), cID('RGBC'), rgbDesc(hex));
+        ld.putObject(cID('Type'), sID('solidColorLayer'), fill);
+        sh.putUnitDouble(cID('Top '), cID('#Pxl'), y);
+        sh.putUnitDouble(cID('Left'), cID('#Pxl'), x);
+        sh.putUnitDouble(cID('Btom'), cID('#Pxl'), y + h);
+        sh.putUnitDouble(cID('Rght'), cID('#Pxl'), x + w);
+        if (withRadius) { sh.putUnitDouble(cID('Rds '), cID('#Pxl'), o.radius); }
+        ld.putObject(cID('Shp '), cID(kind == 'ellipse' ? 'Elps' : 'Rctn'), sh);
+        d.putObject(cID('Usng'), sID('contentLayer'), ld);
+        executeAction(cID('Mk  '), d, DialogModes.NO);
+    }
+    var rad = kind == 'rect' && opt(o, 'radius', 0) > 0;
+    try { make(rad); } catch (e) { make(false); }
+    var l = DOC.activeLayer; l.name = name;
+    return place(l, o);
+}
+function rect(name, x, y, w, h, hex, o) { return shape('rect', name, x, y, w, h, hex, o); }
+function ellipse(name, x, y, w, h, hex, o) { return shape('ellipse', name, x, y, w, h, hex, o); }
+
+// ---------- Dégradé (calque de remplissage dégradé, masqué à la zone) ----------
+// stops : [['#hex', position 0-100], ...] ; angle en degrés ; o.radial = true pour radial
+function gradient(name, x, y, w, h, stops, angle, o) {
+    deselect();
+    var full = (x <= 0 && y <= 0 && x + w >= DOC.width.as('px') && y + h >= DOC.height.as('px'));
+    if (!full) { DOC.selection.select([[x, y], [x + w, y], [x + w, y + h], [x, y + h]]); }
+    try {
+        var d = new ActionDescriptor(), r = new ActionReference(), ld = new ActionDescriptor(), g = new ActionDescriptor(), gr = new ActionDescriptor();
+        r.putClass(sID('contentLayer')); d.putReference(cID('null'), r);
+        g.putUnitDouble(cID('Angl'), cID('#Ang'), angle || 90);
+        g.putEnumerated(cID('Type'), cID('GrdT'), cID(opt(o, 'radial', false) ? 'Rdl ' : 'Lnr '));
+        gr.putString(cID('Nm  '), name);
+        gr.putEnumerated(cID('GrdF'), cID('GrdF'), cID('CstS'));
+        gr.putDouble(cID('Intr'), 4096);
+        var cl = new ActionList(), tl = new ActionList(), i;
+        for (i = 0; i < stops.length; i++) {
+            var s = new ActionDescriptor();
+            s.putObject(cID('Clr '), cID('RGBC'), rgbDesc(stops[i][0]));
+            s.putEnumerated(cID('Type'), cID('Clry'), cID('UsrS'));
+            s.putInteger(cID('Lctn'), Math.round(stops[i][1] * 40.96));
+            s.putInteger(cID('Mdpn'), 50);
+            cl.putObject(cID('Clrt'), s);
+        }
+        for (i = 0; i < 2; i++) {
+            var t = new ActionDescriptor();
+            t.putUnitDouble(cID('Opct'), cID('#Prc'), 100);
+            t.putInteger(cID('Lctn'), i * 4096);
+            t.putInteger(cID('Mdpn'), 50);
+            tl.putObject(cID('TrnS'), t);
+        }
+        gr.putList(cID('Clrs'), cl); gr.putList(cID('Trns'), tl);
+        g.putObject(cID('Grad'), cID('Grdn'), gr);
+        ld.putObject(cID('Type'), sID('gradientLayer'), g);
+        d.putObject(cID('Usng'), sID('contentLayer'), ld);
+        executeAction(cID('Mk  '), d, DialogModes.NO);
+        deselect();
+        var l = DOC.activeLayer; l.name = name;
+        return place(l, o);
+    } catch (e) {
+        deselect();
+        return rect(name, x, y, w, h, stops[0][0], o);
+    }
+}
+
+// ---------- Polygone / trait (calque de pixels) ----------
+// pts : [[x,y], [x,y], ...]
+function polygon(name, pts, hex, o) {
+    deselect();
+    var l = DOC.artLayers.add(); l.name = name;
+    DOC.selection.select(pts);
+    DOC.selection.fill(solid(hex));
+    deselect();
+    return place(l, o);
+}
+function line(name, x1, y1, x2, y2, thick, hex, o) {
+    var dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx * dx + dy * dy) || 1;
+    var nx = -dy / len * thick / 2, ny = dx / len * thick / 2;
+    return polygon(name, [[x1 + nx, y1 + ny], [x2 + nx, y2 + ny], [x2 - nx, y2 - ny], [x1 - nx, y1 - ny]], hex, o);
+}
+
+// ---------- Texte (calque de texte modifiable) ----------
+// x,y = coin haut-gauche du texte (align 'left'), centre-haut ('center') ou droite-haut ('right')
+// o : align, tracking (millièmes d'em), leading (px), caps, bold, italic, underline
+function text(name, content, x, y, size, font, hex, o) {
+    deselect();
+    var l = DOC.artLayers.add(); l.kind = LayerKind.TEXT; l.name = name;
+    var t = l.textItem;
+    t.contents = String(content).replace(/\n/g, '\r');
+    var ok = false;
+    try { app.fonts.getByName(font); t.font = font; ok = true; } catch (e) {}
+    if (!ok) {
+        var bold = /bold|black|heavy|extra|semi|demi/i.test(font);
+        try { t.font = bold ? 'Arial-BoldMT' : 'ArialMT'; } catch (e2) {}
+    }
+    t.size = px(size);
+    t.color = solid(hex);
+    var al = opt(o, 'align', 'left');
+    t.justification = al == 'center' ? Justification.CENTER : (al == 'right' ? Justification.RIGHT : Justification.LEFT);
+    if (opt(o, 'tracking', null) !== null) { t.tracking = o.tracking; }
+    if (opt(o, 'leading', null) !== null) { t.useAutoLeading = false; t.leading = px(o.leading); }
+    if (opt(o, 'caps', false)) { t.capitalization = TextCase.ALLCAPS; }
+    if (opt(o, 'bold', false)) { t.fauxBold = true; }
+    if (opt(o, 'italic', false)) { t.fauxItalic = true; }
+    if (opt(o, 'underline', false)) { t.underline = UnderlineType.UNDERLINELEFT; }
+    t.position = [px(x), px(y + size)];
+    try {
+        var b = l.bounds, L = b[0].as('px'), T = b[1].as('px'), R = b[2].as('px');
+        var ax = al == 'center' ? (L + R) / 2 : (al == 'right' ? R : L);
+        l.translate(px(x - ax), px(y - T));
+    } catch (e3) {}
+    return place(l, o);
+}
+
+// ---------- Zone image (photo, personne, objet, texture...) ----------
+// zone : [x, y, w, h] (rectangle) ou [[x,y], [x,y], ...] (contour détouré)
+// Découpée dans l'image originale si elle a été chargée, sinon rectangle gris à remplacer.
+function image(name, zone, o) {
+    deselect();
+    var pts = zone;
+    if (typeof zone[0] == 'number') { pts = [[zone[0], zone[1]], [zone[0] + zone[2], zone[1]], [zone[0] + zone[2], zone[1] + zone[3]], [zone[0], zone[1] + zone[3]]]; }
+    if (!REF) {
+        return polygon(name + ' (à remplacer)', pts, '#BDBDBD', o);
+    }
+    var l = REF.duplicate();
+    l.visible = true; l.name = name;
+    DOC.activeLayer = l;
+    DOC.selection.select(pts, SelectionType.REPLACE, opt(o, 'feather', 0), true);
+    DOC.selection.invert();
+    DOC.selection.clear();
+    deselect();
+    return place(l, o);
+}
+
+function finish() {
+    deselect();
+    try { BLANK.remove(); } catch (e) {}
+    if (REF) { REF.visible = false; }
+    app.preferences.rulerUnits = OLD_RU;
+    app.preferences.typeUnits = OLD_TU;
+    alert('Terminé ! ' + COUNT + ' calques créés.\nPense à enregistrer en .PSD (Fichier > Enregistrer sous).');
+}
+// ===================== FIN DE LA BIBLIOTHÈQUE =====================
+
+--------------------------------------------------------------------------------
+EXEMPLE DE FONCTION build() (pour une affiche 1080×1350 — adapte-la à l'image reçue)
+--------------------------------------------------------------------------------
+// ===================== CONSTRUCTION (partie écrite par l'IA) =====================
+function build() {
+    createDoc('Affiche_calques', 1080, 1350, '#0E1B2C');
+    loadReference();
+
+    var fond = group('Fond');
+    gradient('Dégradé ciel', 0, 0, 1080, 900, [['#0E1B2C', 0], ['#1E3A5F', 100]], 90, { group: fond });
+    ellipse('Cercle lumineux', 600, -150, 700, 700, '#F2B705', { group: fond, opacity: 25 });
+
+    var photo = group('Photo');
+    image('Personne', [[300, 300], [780, 300], [820, 1150], [260, 1150]], { group: photo, shadow: { opacity: 40, distance: 12, size: 30 } });
+
+    var bas = group('Bandeau');
+    rect('Bandeau jaune', 0, 1150, 1080, 200, '#F2B705', { group: bas });
+    line('Filet', 240, 1185, 840, 1185, 3, '#0E1B2C', { group: bas });
+
+    var txt = group('Textes');
+    text('Titre', 'GRANDE SOIRÉE', 540, 80, 110, 'Montserrat-ExtraBold', '#FFFFFF', { group: txt, align: 'center', tracking: 20 });
+    text('Date', 'Samedi 12 décembre · 20h', 540, 1215, 48, 'Montserrat-SemiBold', '#0E1B2C', { group: txt, align: 'center' });
+    rect('Bouton', 390, 1000, 300, 90, '#FFFFFF', { group: txt, radius: 45, stroke: { color: '#F2B705', size: 4 } });
+    text('Texte bouton', 'RÉSERVER', 540, 1025, 36, 'Montserrat-Bold', '#0E1B2C', { group: txt, align: 'center' });
+
+    finish();
+}
+try { build(); } catch (e) { alert('Erreur ligne ' + e.line + ' : ' + e.message); }
+
+================================================================================
+ FIN DES INSTRUCTIONS — exécute maintenant la mission sur l'image fournie.
+================================================================================
